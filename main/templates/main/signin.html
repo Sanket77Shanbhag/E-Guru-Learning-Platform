@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>eGuru - Sign In</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+    <div class="container">
+        <div class="left">
+            <img src="/static/logo-eguru.png" alt="eGuru Logo" class="logo" />
+            <h1>Welcome to the HAL e-Learning Platform</h1>
+            <img src="/static/logo-hal.png" alt="HAL Logo" class="hal-logo" />
+        </div>
+        <div class="right">
+            <h2>Sign In</h2>
+            <form method="post">
+                {% csrf_token %}
+                <label for="pb_number">PB Number:</label>
+                <input type="text" id="pb_number" name="pb_number" required />
+
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required />
+
+                <button type="submit">Sign In</button>
+            </form>
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
