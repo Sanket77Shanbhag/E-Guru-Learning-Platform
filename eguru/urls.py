@@ -19,11 +19,11 @@ from django.urls import path
 from main import views
 
 urlpatterns = [
-    #path('', views.index, name='index'),
-    path('', views.signin, name='signin'),
-    path('signout/', views.signout, name='signout'),
+    path('', views.home, name='home'),
+    path('signin/', views.signin, name='signin'),
+    path('signup/', views.signup, name='signup'),
+    path('signin/', views.signout, name='signout'),
     path('admin/dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('user/dashboard/', views.user_dashboard, name='user_dashboard'),
     path('profile/', views.profile, name='profile'),
-
 ]
