@@ -1,10 +1,219 @@
 <!DOCTYPE html>
-<html>
-  <head>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>User Dashboard - eGuru</title>
-  </head>
-  <body>
-    <h1>Welcome User</h1>
-    <a href="/profile/">Profile</a> | <a href="/signin/">User</a>
-  </body>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #f8f8f8; font-family: 'Roboto', sans-serif; }
+        .layout { display: flex; height: 100vh; }
+        .sidebar { background-color: #f8f9fa; color: black; width: 250px; overflow-y: auto; }
+        .sidebar a { color: black; padding: 15px; display: block; }
+        .sidebar a:hover,{ background-color: rgb(218, 236, 255); text-decoration: none; }
+        .main-content { flex-grow: 1; padding: 30px; overflow-y: auto; }
+        .content-section { display: none; }
+        #dashboard { display: block; }
+        .navbar { background-color: #f8f9fa; color: black; }
+        .logo { width: 180px; margin-bottom: 20px; }
+        #profile { display: none; position: fixed; top: 100px; right: 40px; width: 300px; height: 400px; background-color: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); overflow: hidden; z-index: 9999;}
+        #chatBox1 { display: none; position: fixed; bottom: 30px; right: 130px; width: 300px; height: 400px; background-color: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); overflow: hidden; }
+        #chatMessages { height: 340px; overflow-x: auto; padding: 10px; }
+        #chatInput { display: flex; }
+        #chatInput input { flex-grow: 1; padding: 10px; border: none; border-top: 1px solid #ccc; }
+        #chatInput button { background-color: black; color: white; border: none; padding: 10px 15px; }
+        #robot-circle {width: 80px; height: 80px; background-color: #f0f0f0; border-radius: 50%; justify-content: center; display: flex; align-items: center; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); overflow: hidden; position: fixed; bottom: 30px; right: 30px; }
+        #robot-circle img {width: 50px; height: 50px;}
+        .stats-container { display: flex; justify-content: space-around; margin-top: 20px; }
+        .stat-card { background-color: #fff; border-radius: 8px; padding: 20px; text-align: center; width: 30%; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+        .stat-icon { font-size: 24px; margin-bottom: 10px; }
+        #training-list { margin-top: 20px; }
+        .progress { height: 20px; }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar -->
+        <div class="sidebar p-3">
+            <img src="/static/eguru.webp" alt="eGuru Logo" class="logo" />
+            <ul class="nav flex-column">
+                <li class="nav-item"><a href="#dashboard" class="nav-link"><i class="fa fa-layer-group"></i> Dashboard</a></li>
+                <li class="nav-item"><a href="#analytics" class="nav-link"><i class="fa fa-chart-area"></i>  Analytics</a></li>
+                <li class="nav-item"><a href="#all-trainings" class="nav-link"><i class="fa fa-book-reader"></i> All Trainings</a></li>
+                <li class="nav-item"><a href="#manage-trainings" class="nav-link"><button class="btn btn-dark w-100 mt-3" onclick="eguruChat()">💬 Chat with eGuru</button></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Navbar -->
+            <nav class="navbar navbar-expand-lg navbar-dark">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="#"></a>
+                    <div class="d-flex">
+                        <!-- Changed the logout link to point to signout URL -->
+                        <a href="{% url 'signout' %}" class="btn btn-light"><i class="fa fa-sign-out-alt"></i> User</a>
+                        <button class="btn btn-light" onclick = "toggleChat()"><i class="fa fa-user"></i> {{user.name}}</button>
+                    </div>  
+                </div>
+            </nav>
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="content-section">
+              <h2>Welcome to the Dashboard</h2>
+              <p>Track your ongoing, registered, and completed trainings here.</p>
+              
+              <div class="stats-container">
+                  <div class="stat-card">
+                      <div class="stat-icon text-warning"><i class="fa fa-star"></i></div>
+                      <h5>Interested</h5>
+                      <p>{{ interested_courses }} Courses</p>
+                  </div>
+                  <div class="stat-card">
+                      <div class="stat-icon text-primary"><i class="fa fa-book"></i></div>
+                      <h5>Enrolled</h5>
+                      <p>{{ enrolled_courses }} Courses</p>
+                  </div>
+                  <div class="stat-card">
+                      <div class="stat-icon text-success"><i class="fa fa-check"></i></div>
+                      <h5>Completed</h5>
+                      <p>{{ completed_courses }} Courses</p>
+                  </div>
+              </div>
+            </div>
+
+            <div id="analytics" class="content-section">
+                <h4>Analytics Section</h4>
+                <div>
+                    <label><input type="checkbox" id="categoryCheckbox"> Category</label>
+                    <label><input type="checkbox" id="trainingStatCheckbox"> Training Stat</label>
+                </div>
+                <canvas id="analyticsChart"></canvas>
+            </div>
+
+            <div id="all-trainings" class="content-section">All Trainings Content</div>
+
+        </div>
+
+        <!-- Chat with Assistant -->
+        <div id="robot-circle" onclick="toggleChat1()">
+            <img src="https://cdn-icons-png.flaticon.com/512/4712/4712043.png" alt="Robot Logo" />
+        </div>
+
+        <div id="chatBox1">
+            <div id="chatMessages"></div>
+            <div id="chatInput">
+                <input type="text" id="messageInput" placeholder="Type a message..." />
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+
+        <!-- Admin Profile -->
+        <div id="profile">
+            <div class="p-3">
+                <h5><b>User Profile</b></h5></br>
+                <p>PB Number: {{ user.pb_number }}</p>
+                <p>Name: {{ user.name }}</p>
+                <p>Gender: {{ user.gender }}</p>
+                <p>Role: {{ user.role }}</p>
+                <p>Division: {{ user.division|default:'N/A' }}</p>
+                <p>Department: {{ user.department|default:'N/A' }}</p>
+                <p>Designation: {{ user.designation|default:'N/A' }}</p>
+
+                {% comment %} <button class="btn btn-primary mt-3" onclick="togglePasswordForm()">Change Password</button>
+
+                <div id="passwordForm" style="display:none; margin-center: 20px;">
+                <label for="oldPassword">Old Password:</label>
+                <input type="password" id="oldPassword" class="form-control" required>
+
+                <label for="newPassword" class="mt-2">New Password:</label>
+                <input type="password" id="newPassword" class="form-control" required>
+
+                <button class="btn btn-success mt-3" onclick="updatePassword()">Update Password</button>
+                </div> {% endcomment %}
+            </div>
+        </div>
+
+    <script>
+        const links = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('.content-section');
+
+        links.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                sections.forEach(section => section.style.display = 'none');
+                const targetId = link.getAttribute('href').substring(1);
+                document.getElementById(targetId).style.display = 'block';
+            });
+        });
+
+        function toggleChat1() {
+            const chatBox = document.getElementById('chatBox1');
+            chatBox.style.display = chatBox.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function toggleChat() {
+            const chatBox = document.getElementById('profile');
+            chatBox.style.display = chatBox.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function eguruChat(){
+            const chatBox = document.getElementById('chatBox1');
+            chatBox.style.display = chatBox.style.display === 'block' ? 'none' : 'block';
+            document.getElementById('messageInput').value = "Hello Assistant!";
+            sendMessage();
+        }
+        {% comment %} function togglePasswordForm() {
+            const passwordForm = document.getElementById('passwordForm');
+            passwordForm.style.display = passwordForm.style.display === 'block' ? 'none' : 'block';
+        } {% endcomment %}
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (message) {
+              const chatMessages = document.getElementById('chatMessages');
+          
+              if (!chatMessages) {
+                console.error("Chat messages container not found.");
+                return;
+              }
+          
+              const msgDiv = document.createElement('div');
+              msgDiv.textContent = `You: ${message}`;
+              chatMessages.appendChild(msgDiv);
+              input.value = '';
+          
+              // Scroll to the bottom for visibility
+              chatMessages.scrollTop = chatMessages.scrollHeight;
+          
+              setTimeout(() => {
+                const botDiv = document.createElement('div');
+                botDiv.textContent = generateResponse(message);
+                chatMessages.appendChild(botDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+              }, 500);
+            }
+          }
+          
+        function generateResponse(message) {
+            const lowerCaseMessage = message.toLowerCase();
+          
+            if (lowerCaseMessage.includes('hi') || lowerCaseMessage.includes('hello')) {
+              return 'Assistant: Hello! How can I assist you today?';
+            } else if (lowerCaseMessage.includes('progress report')) {
+              return 'Assistant: Of course! You can view detailed progress reports by navigating to the "Analytics" section.';
+            } else if (lowerCaseMessage.includes('eguru llm')) {
+              return 'Assistant: eGuru LLM is a specialized AI assistant designed to provide training information, answer queries, and offer personalized guidance based on your HAL Management Academy activities.';
+            } else if (lowerCaseMessage.includes('thanks') || lowerCaseMessage.includes('thankyou')) {
+              return 'Assistant: You’re welcome! Have a great day, and feel free to reach out anytime you need assistance.';
+            } else {
+              return 'Assistant: I\'m sorry, I didn\'t quite understand that. Could you please rephrase or ask something else?';
+            }
+        }
+
+    </script>
+</body>
 </html>

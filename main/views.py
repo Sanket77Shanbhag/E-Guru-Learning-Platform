@@ -5,9 +5,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password, check_password
 from .forms import LoginForm, UserRegistrationForm
 from .models import User, users_collection
-from db_connection import db
+from pymongo import MongoClient
 
 # MongoDB connection
+client = MongoClient('mongodb://localhost:27017/')
+db = client['eguru']
 users_collection = db['users']
 
 def signin(request):
@@ -56,7 +58,8 @@ def signup(request):
                 "department": department,
                 "designation": designation
             }
-            users_collection.insert_one(user_data)
+            result = users_collection.insert_one(user_data)
+            print(f"User Inserted with ID: {result.inserted_id}")
             messages.success(request, 'Account created successfully. Please sign in.')
             return redirect('signin')
 
@@ -92,29 +95,76 @@ def home(request):
 # Admin Dashboard with session validation
 
 def admin_dashboard(request):
-    print(f"Session data: pb_number={request.session.get('pb_number')}, role={request.session.get('role')}")
-    if request.session.get('pb_number') and request.session.get('role') == 'admin':
-        return render(request, 'main/admin_dashboard.html')
-    else:
-        messages.error(request, 'Access denied. Admin access only.')
-        return redirect('signin')
+    # The middleware already verified that this is a valid admin user
+    pb_number = request.session.get('pb_number')
+    user_data = users_collection.find_one({"pb_number": pb_number})
+    all_users = list(users_collection.find({}))
+    return render(request, 'main/admin_dashboard.html', {'all_users': all_users, 'admin': user_data})
 
-# User Dashboard
 def user_dashboard(request):
-    if request.session.get('pb_number') and request.session.get('role') == 'user':
-        return render(request, 'main/user_dashboard.html')
-    else:
-        messages.error(request, 'Access denied. User access only.')
-        return redirect('signin')
+    pb_number = request.session.get('pb_number')
+    user_data = users_collection.find_one({"pb_number": pb_number})
+    return render(request, 'main/user_dashboard.html', {'user': user_data})
 
-# Profile Page (Common for both users and admins)
+def create_user(request):
+    if request.method == 'POST':
+        pb_number = request.POST.get('pb_number')
+        password = request.POST.get('password')
+        name = request.POST.get('name')
+        gender = request.POST.get('gender')
+        role = request.POST.get('role')
+        division = request.POST.get('division')
+        department = request.POST.get('department')
+        designation = request.POST.get('designation')
+
+        if users_collection.find_one({"pb_number": pb_number}):
+            messages.error(request, 'PB Number already exists.')
+        else:
+            hashed_password = make_password(password)
+            user_data = {
+                "pb_number": pb_number,
+                "password": hashed_password,
+                "name": name,
+                "gender": gender,
+                "role": role,
+                "division": division,
+                "department": department,
+                "designation": designation
+            }
+            users_collection.insert_one(user_data)
+            messages.success(request, 'User created successfully.')        
+        return redirect('admin_dashboard')
+    return render(request, 'main/admin_dashboard.html')
+
 def profile(request):
+    # The middleware already verified that this is a valid user
+    pb_number = request.session.get('pb_number')
+    user_data = users_collection.find_one({"pb_number": pb_number})
+    return render(request, 'main/profile.html', {'user_data': user_data})
+
+
+def edit_user(request, user_id):
+    # Check if authenticated user is admin
     pb_number = request.session.get('pb_number')
     user_data = users_collection.find_one({"pb_number": pb_number})
     
-    if user_data:
-        return render(request, 'main/profile.html', {'user_data': user_data})
-    else:
-        messages.error(request, 'Invalid session. Please log in again.')
+    if not user_data or user_data.get('role', '').lower() != 'admin':
+        messages.error(request, 'Access denied. Admin access only.')
         return redirect('signin')
     
+    # Implementation for editing users
+    messages.info(request, 'Edit user functionality will be implemented soon.')
+    return redirect('admin_dashboard')
+
+def delete_user(request, user_id):
+    # Check if authenticated user is admin
+    pb_number = request.session.get('pb_number')
+    user_data = users_collection.find_one({"pb_number": pb_number})
+    
+    if not user_data or user_data.get('role', '').lower() != 'admin':
+        messages.error(request, 'Access denied. Admin access only.')
+        return redirect('signin')
+    
+    # Implementation for deleting users
+    messages.info(request, 'Delete user functionality will be implemented soon.')
+    return redirect('admin_dashboard')

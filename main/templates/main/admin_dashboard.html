@@ -8,21 +8,56 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { background-color: #f8f9fa; }
+        body { background-color: #f8f8f8; font-family: 'Roboto', sans-serif; }
         .layout { display: flex; height: 100vh; }
-        .sidebar { background-color: #343a40; color: white; width: 250px; overflow-y: auto; }
-        .sidebar a { color: white; padding: 15px; display: block; }
-        .sidebar a:hover { background-color: #495057; text-decoration: none; }
-        .main-content { flex-grow: 1; padding: 20px; overflow-y: auto; }
+        .sidebar { background-color: #f8f9fa; color: black; width: 250px; overflow-y: auto; position: sticky; top:0;  border-right: 1px solid #e9ecef; }
+        .sidebar img { width: 100%; margin-bottom: 20px; }
+        .sidebar a { color: black; padding: 15px; display: block; }
+        .sidebar a:hover, a.active { background-color: rgb(218, 236, 255); text-decoration: none; }
+        .main-content { flex-grow: 1; padding: 30px; overflow-y: auto; }
         .content-section { display: none; }
         #analytics { display: block; }
-        .navbar { background-color: #f8f9fa; color: white; }
+        .navbar { background-color: #f8f9fa; color: black; }
         .logo { width: 180px; margin-bottom: 20px; }
-        #chatBox { display: none; position: fixed; bottom: 20px; right: 20px; width: 300px; height: 400px; background-color: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); overflow: hidden; }
-        #chatMessages { height: 340px; overflow-y: auto; padding: 10px; }
+        #profile { display: none; position: fixed; top: 100px; right: 40px; width: 300px; height: 400px; background-color: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); overflow: hidden; z-index: 9999;}
+        #chatBox1 { display: none; position: fixed; bottom: 30px; right: 130px; width: 300px; height: 400px; background-color: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); overflow: hidden; }
+        #chatMessages { height: 340px; overflow-x: auto; padding: 10px; }
         #chatInput { display: flex; }
         #chatInput input { flex-grow: 1; padding: 10px; border: none; border-top: 1px solid #ccc; }
-        #chatInput button { background-color: #007bff; color: white; border: none; padding: 10px 15px; }
+        #chatInput button { background-color: black; color: white; border: none; padding: 10px 15px; }
+        #robot-circle {width: 80px; height: 80px; background-color: #f0f0f0; border-radius: 50%; justify-content: center; display: flex; align-items: center; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); overflow: hidden; position: fixed; bottom: 30px; right: 30px; }
+        #robot-circle img {width: 50px; height: 50px;}
+        .filter-container { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .user-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .user-table th, .user-table td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+        .user-table th { background-color: #f0f0f0; }
+        .filter-container select, .filter-container button { padding: 8px; margin-right: 10px; }
+        .action-menu { position: relative; display: inline-block; }
+        .action-menu .menu-content { display: none; position: absolute; background-color: #fff; min-width: 120px; box-shadow: 0px 8px 16px rgba(0,0,0,0.2); z-index: 1; }
+        .action-menu .menu-content a { color: black; padding: 10px 16px; text-decoration: none; display: block; }
+        .action-menu .menu-content a:hover { background-color: #f0f0f0; }
+        .action-menu:hover .menu-content { display: block; }
+        .add-user-btn { display: block }
+        #create-user-section { margin-top: 40px; padding: 20px; border: 1px solid #ccc; border-radius: 8px; background-color: #fff; width: 30%; }
+        #create-user-section input, #create-user-section select, #create-user-section button { margin-bottom: 10px; width: calc(100% - 20px); padding: 10px; }
+        .training-card .card {
+          transition: transform 0.3s;
+      }
+      .training-card .card:hover {
+          transform: translateY(-5px);
+      }
+      .training-card .card-img-top {
+          height: 140px; /* Reduced image height */
+          object-fit: cover;
+      }
+      .training-card .card-body {
+          padding: 12px;
+      }
+      .training-card .card-text {
+          font-size: 0.9rem;
+          height: 60px;
+          overflow: hidden;
+      }
     </style>
 </head>
 <body>
@@ -30,14 +65,13 @@
         <!-- Sidebar -->
         <div class="sidebar p-3">
             <img src="/static/eguru.webp" alt="eGuru Logo" class="logo" />
-            <h4 class="mb-4">eGuru <i class="fa fa-graduation-cap"></i></h4>
             <ul class="nav flex-column">
-                <li class="nav-item"><a href="#analytics" class="nav-link">📊 Analytics</a></li>
-                <li class="nav-item"><a href="#all-trainings" class="nav-link">📚 All Trainings</a></li>
+                <li class="nav-item"><a href="#analytics" class="nav-link"><i class="fa fa-chart-area"></i> Analytics</a></li>
+                <li class="nav-item"><a href="#all-trainings" class="nav-link"><i class="fa fa-book-reader"></i> All Trainings</a></li>
                 <li class="nav-item"><a href="#manage-trainings" class="nav-link">⚙️ Manage Trainings</a></li>
-                <li class="nav-item"><a href="#manage-users" class="nav-link">👥 Manage Users</a></li>
-                <li class="nav-item"><a href="#manage-llm" class="nav-link">🤖 Manage eGuru LLM</a></li>
-                <li class="nav-item"><button class="btn btn-primary w-100 mt-3" onclick="toggleChat()">💬 Chat with eGuru</button></li>
+                <li class="nav-item"><a href="#manage-users" class="nav-link"><i class="fa fa-users-cog"></i> Manage Users</a></li>
+                <li class="nav-item"><a href="#manage-llm" class="nav-link"><i class="fa fa-robot"></i> Manage eGuru LLM</a></li>
+                <li class="nav-item"><button class="btn btn-dark w-100 mt-3" onclick="toggleChat">💬 Chat with eGuru</button></li>
             </ul>
         </div>
 
@@ -46,29 +80,15 @@
             <!-- Navbar -->
             <nav class="navbar navbar-expand-lg navbar-dark">
                 <div class="container-fluid">
-                    <a class="navbar-brand" href="#">eGuru Admin Panel</a>
+                    <a class="navbar-brand" href="#"></a>
                     <div class="d-flex">
                         <!-- Changed the logout link to point to signout URL -->
-                        <a href="{% url 'signout' %}" class="btn btn-danger">Logout</a>
-                        <a href="{% url 'profile' %}" class="btn btn-outline-dark me-2">Admin Profile</a>
-                    </div>
+                        <a href="{% url 'signout' %}" class="btn btn-light"><i class="fa fa-sign-out-alt"></i> Admin</a>
+                        <button class="btn btn-light" onclick = "toggleChat()"><i class="fa fa-user"></i> {{admin.name}}</button>
+                    </div>  
                 </div>
             </nav>
-
-            <!-- Display messages if any -->
-            {% if messages %}
-            
-            <div class="messages">
-                {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">
-                    {{ message }}
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-
-            <h2 class="mb-4">Admin Dashboard</h2>
-
+            <!-- Analytics sections -->
             <div id="analytics" class="content-section">
                 <h4>Analytics Section</h4>
                 <div>
@@ -77,22 +97,315 @@
                 </div>
                 <canvas id="analyticsChart"></canvas>
             </div>
+            
+            <!-- All Trainings -->
+            <div id="all-trainings" class="content-section">
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4>All Trainings</h4>
+                <div class="d-flex">
+                  <input type="text" class="form-control me-2" placeholder="Search trainings..." id="trainingSearchInput">
+                  <select class="form-select me-2" style="width: auto;" id="trainingCategoryFilter">
+                    <option value="all">All Categories</option>
+                    <option value="technical">Technical</option>
+                    <option value="soft-skills">Soft Skills</option>
+                    <option value="leadership">Leadership</option>
+                    <option value="industry">Industry Knowledge</option>
+                  </select>
+                  <select class="form-select" style="width: auto;" id="statusFilter">
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="upcoming">Upcoming</option>
+                    <option value="completed">Completed</option>
+                  </select>
+                </div>
+              </div>
 
-            <div id="all-trainings" class="content-section">All Trainings Content</div>
+              <div class="row row-cols-1 row-cols-md-4 g-3" id="trainingsContainer">
+                <!-- Training Card 1 -->
+                <div class="col training-card" data-category="technical" data-status="active">
+                  <div class="card h-100 shadow-sm">
+                    <div class="position-relative">
+                      <img src="https://placehold.co/600x200/e9f5ff/003366?text=Python+Programming" class="card-img-top" alt="Python Programming">
+                      <span class="position-absolute top-0 end-0 badge bg-success m-2">Active</span>
+                    </div>
+                    <div class="card-body">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="card-title mb-0">Python Programming</h6>
+                        <span class="badge bg-primary">Technical</span>
+                      </div>
+                      <p class="card-text small">Learn Python programming fundamentals and advanced concepts for data analysis.</p>
+                      <div class="d-flex justify-content-between align-items-center mt-2">
+                        <small class="text-muted">8 Weeks</small>
+                        <small class="text-muted">42 users</small>
+                      </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                      <div class="d-flex justify-content-between">
+                        <button class="btn btn-sm btn-outline-primary">Details</button>
+                        <button class="btn btn-sm btn-success">Enroll</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Training Card 2 -->
+                <div class="col training-card" data-category="soft-skills" data-status="upcoming">
+                  <div class="card h-100 shadow-sm">
+                    <div class="position-relative">
+                      <img src="https://placehold.co/600x200/fff5e9/663300?text=Communication+Skills" class="card-img-top" alt="Communication Skills">
+                      <span class="position-absolute top-0 end-0 badge bg-warning m-2">Upcoming</span>
+                    </div>
+                    <div class="card-body">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="card-title mb-0">Communication Skills</h5>
+                        <span class="badge bg-info">Soft Skills</span>
+                      </div>
+                      <p class="card-text">Enhance your verbal and written communication skills for professional growth and team collaboration.</p>
+                      <div class="d-flex justify-content-between align-items-center mt-3">
+                        <small class="text-muted">Duration: 4 Weeks</small>
+                        <small class="text-muted">Enrolled: 28 users</small>
+                      </div>
+                    </div>
+                    <div class="card-footer bg-transparent d-flex justify-content-between">
+                      <button class="btn btn-sm btn-outline-primary">View Details</button>
+                      <button class="btn btn-sm btn-success">Enroll</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Training Card 3 -->
+                <div class="col training-card" data-category="leadership" data-status="active">
+                  <div class="card h-100 shadow-sm">
+                    <div class="position-relative">
+                      <img src="https://placehold.co/600x200/e9fff5/003633?text=Leadership+Development" class="card-img-top" alt="Leadership Development">
+                      <span class="position-absolute top-0 end-0 badge bg-success m-2">Active</span>
+                    </div>
+                    <div class="card-body">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="card-title mb-0">Leadership Development</h5>
+                        <span class="badge bg-danger">Leadership</span>
+                      </div>
+                      <p class="card-text">Develop essential leadership skills for managing teams and driving organizational success.</p>
+                      <div class="d-flex justify-content-between align-items-center mt-3">
+                        <small class="text-muted">Duration: 12 Weeks</small>
+                        <small class="text-muted">Enrolled: 18 users</small>
+                      </div>
+                    </div>
+                    <div class="card-footer bg-transparent d-flex justify-content-between">
+                      <button class="btn btn-sm btn-outline-primary">View Details</button>
+                      <button class="btn btn-sm btn-success">Enroll</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Training Card 4 -->
+                <div class="col training-card" data-category="industry" data-status="completed">
+                  <div class="card h-100 shadow-sm">
+                    <div class="position-relative">
+                      <img src="https://placehold.co/600x200/f5e9ff/330066?text=Industry+Trends" class="card-img-top" alt="Industry Trends">
+                      <span class="position-absolute top-0 end-0 badge bg-secondary m-2">Completed</span>
+                    </div>
+                    <div class="card-body">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="card-title mb-0">Industry Trends 2025</h5>
+                        <span class="badge bg-dark">Industry</span>
+                      </div>
+                      <p class="card-text">Stay updated with the latest industry trends, technologies, and market developments.</p>
+                      <div class="d-flex justify-content-between align-items-center mt-3">
+                        <small class="text-muted">Duration: 6 Weeks</small>
+                        <small class="text-muted">Enrolled: 53 users</small>
+                      </div>
+                    </div>
+                    <div class="card-footer bg-transparent d-flex justify-content-between">
+                      <button class="btn btn-sm btn-outline-primary">View Details</button>
+                      <button class="btn btn-sm btn-outline-secondary" disabled>Completed</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Training Card 5 -->
+                <div class="col training-card" data-category="technical" data-status="active">
+                  <div class="card h-100 shadow-sm">
+                    <div class="position-relative">
+                      <img src="https://placehold.co/600x200/e9f5ff/003366?text=Data+Science" class="card-img-top" alt="Data Science">
+                      <span class="position-absolute top-0 end-0 badge bg-success m-2">Active</span>
+                    </div>
+                    <div class="card-body">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="card-title mb-0">Data Science Fundamentals</h5>
+                        <span class="badge bg-primary">Technical</span>
+                      </div>
+                      <p class="card-text">Explore data analysis, visualization, and machine learning techniques for business insights.</p>
+                      <div class="d-flex justify-content-between align-items-center mt-3">
+                        <small class="text-muted">Duration: 10 Weeks</small>
+                        <small class="text-muted">Enrolled: 37 users</small>
+                      </div>
+                    </div>
+                    <div class="card-footer bg-transparent d-flex justify-content-between">
+                      <button class="btn btn-sm btn-outline-primary">View Details</button>
+                      <button class="btn btn-sm btn-success">Enroll</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Training Card 6 -->
+                <div class="col training-card" data-category="soft-skills" data-status="upcoming">
+                  <div class="card h-100 shadow-sm">
+                    <div class="position-relative">
+                      <img src="https://placehold.co/600x200/fff5e9/663300?text=Time+Management" class="card-img-top" alt="Time Management">
+                      <span class="position-absolute top-0 end-0 badge bg-warning m-2">Upcoming</span>
+                    </div>
+                    <div class="card-body">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="card-title mb-0">Time Management</h5>
+                        <span class="badge bg-info">Soft Skills</span>
+                      </div>
+                      <p class="card-text">Master effective time management strategies to boost productivity and work-life balance.</p>
+                      <div class="d-flex justify-content-between align-items-center mt-3">
+                        <small class="text-muted">Duration: 3 Weeks</small>
+                        <small class="text-muted">Enrolled: 25 users</small>
+                      </div>
+                    </div>
+                    <div class="card-footer bg-transparent d-flex justify-content-between">
+                      <button class="btn btn-sm btn-outline-primary">View Details</button>
+                      <button class="btn btn-sm btn-success">Enroll</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pagination -->
+              <nav aria-label="Training pagination" class="mt-5">
+                <ul class="pagination justify-content-center">
+                  <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1">Previous</a>
+                  </li>
+                  <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                  <li class="page-item"><a class="page-link" href="#">2</a></li>
+                  <li class="page-item"><a class="page-link" href="#">3</a></li>
+                  <li class="page-item">
+                    <a class="page-link" href="#">Next</a>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+
+
+
+            <!-- Manage Trainings -->
             <div id="manage-trainings" class="content-section">Manage Trainings Content</div>
-            <div id="manage-users" class="content-section">Manage Users Content</div>
+
+
+            <!-- Manage Users -->
+            <div id="manage-users" class="content-section">
+                <div class="filter-container">
+                  <div>
+                    <select id="userFilter">
+                      <option value="all">All Users</option>
+                      <option value="admin">Admin</option>
+                      <option value="user">User</option>
+                    </select>
+                    <button class="btn btn-success" onclick="filterUsers()">Filter</button>
+                  </div>
+                  <button class="btn btn-light add-user-btn"><a href="#create-user-section" class="nav-link">
+                    <i class="fa fa-user-plus"></i> Add User</a>
+                  </button>
+                </div>
+              
+                <table class="user-table">
+                  <thead>
+                    <tr>
+                      <th>PB Number</th>
+                      <th>Name</th>
+                      <th>Role</th>
+                      <th>Division</th>
+                      <th>Department</th>
+                      <th>Designation</th>
+                      {% comment %} <th>Action</th> {% endcomment %}
+                    </tr>
+                  </thead>
+                  <tbody id="userTableBody">
+                    {% for user in all_users %}
+                    <tr>
+                      <td>{{ user.pb_number|default:'N/A' }}</td>
+                      <td>{{ user.name|default:'N/A' }}</td>
+                      <td>{{ user.role|default:'N/A' }}</td>
+                      <td>{{ user.division|default:'N/A' }}</td>
+                      <td>{{ user.department|default:'N/A' }}</td>
+                      <td>{{ user.designation|default:'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+            </div>
+            <div id="create-user-section" class="content-section" style="display: none;">
+              <h5>Create User</h5>
+              <form method="post" action="{% url 'create_user' %}">
+                  {% csrf_token %}
+                  <input type="text" name="pb_number" placeholder="PB Number" required />
+                  <input type="password" name="password" placeholder="Password" required />
+                  <input type="text" name="name" placeholder="Name" required />
+                  <select name="gender" required>
+                      <option value="">Select Gender</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                  </select>
+                  <select name="role" required>
+                      <option value="">Select Role</option>
+                      <option value="Admin">Admin</option>
+                      <option value="User">User</option>
+                  </select>
+                  <input type="text" name="division" placeholder="Division" />
+                  <input type="text" name="department" placeholder="Department" />
+                  <input type="text" name="designation" placeholder="Designation" />
+                  <button type="submit" class="btn btn-success">Create User</button>
+              </form>
+            </div>
+          
+              
+
             <div id="manage-llm" class="content-section">Manage eGuru LLM Content</div>
         </div>
 
-        <!-- Chat with eGuru -->
-        <div id="chatBox">
+        <!-- Chat with Assistant -->
+        <div id="robot-circle" onclick="toggleChat1()">
+            <img src="https://cdn-icons-png.flaticon.com/512/4712/4712043.png" alt="Robot Logo" />
+        </div>
+
+        <div id="chatBox1">
             <div id="chatMessages"></div>
             <div id="chatInput">
                 <input type="text" id="messageInput" placeholder="Type a message..." />
                 <button onclick="sendMessage()">Send</button>
             </div>
         </div>
-    </div>
+
+        <!-- Admin Profile -->
+        <div id="profile">
+            <div class="p-3">
+                <h5><b>User Profile</b></h5></br>
+                <p>PB Number: {{ admin.pb_number }}</p>
+                <p>Name: {{ admin.name }}</p>
+                <p>Gender: {{ admin.gender }}</p>
+                <p>Role: {{ admin.role }}</p>
+                <p>Division: {{ admin.division|default:'N/A' }}</p>
+                <p>Department: {{ admin.department|default:'N/A' }}</p>
+                <p>Designation: {{ admin.designation|default:'N/A' }}</p>
+
+                {% comment %} <button class="btn btn-primary mt-3" onclick="togglePasswordForm()">Change Password</button>
+
+                <div id="passwordForm" style="display:none; margin-center: 20px;">
+                <label for="oldPassword">Old Password:</label>
+                <input type="password" id="oldPassword" class="form-control" required>
+
+                <label for="newPassword" class="mt-2">New Password:</label>
+                <input type="password" id="newPassword" class="form-control" required>
+
+                <button class="btn btn-success mt-3" onclick="updatePassword()">Update Password</button>
+                </div> {% endcomment %}
+            </div>
+        </div>
 
     <script>
         const links = document.querySelectorAll('.nav-link');
@@ -107,28 +420,107 @@
             });
         });
 
-        function toggleChat() {
-            const chatBox = document.getElementById('chatBox');
+        function toggleChat1() {
+            const chatBox = document.getElementById('chatBox1');
             chatBox.style.display = chatBox.style.display === 'block' ? 'none' : 'block';
         }
+
+        function toggleChat() {
+            const chatBox = document.getElementById('profile');
+            chatBox.style.display = chatBox.style.display === 'block' ? 'none' : 'block';
+        }
+
+        {% comment %} function togglePasswordForm() {
+            const passwordForm = document.getElementById('passwordForm');
+            passwordForm.style.display = passwordForm.style.display === 'block' ? 'none' : 'block';
+        } {% endcomment %}
 
         function sendMessage() {
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
+            
             if (message) {
-                const chatMessages = document.getElementById('chatMessages');
-                const msgDiv = document.createElement('div');
-                msgDiv.textContent = `You: ${message}`;
-                chatMessages.appendChild(msgDiv);
-                input.value = '';
-
-                setTimeout(() => {
-                    const botDiv = document.createElement('div');
-                    botDiv.textContent = `eGuru: Hello! How can I assist you?`;
-                    chatMessages.appendChild(botDiv);
-                }, 500);
+              const chatMessages = document.getElementById('chatMessages');
+          
+              if (!chatMessages) {
+                console.error("Chat messages container not found.");
+                return;
+              }
+          
+              const msgDiv = document.createElement('div');
+              msgDiv.textContent = `You: ${message}`;
+              chatMessages.appendChild(msgDiv);
+              input.value = '';
+          
+              // Scroll to the bottom for visibility
+              chatMessages.scrollTop = chatMessages.scrollHeight;
+          
+              setTimeout(() => {
+                const botDiv = document.createElement('div');
+                botDiv.textContent = generateResponse(message);
+                chatMessages.appendChild(botDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+              }, 500);
+            }
+          }
+          
+          function generateResponse(message) {
+            const lowerCaseMessage = message.toLowerCase();
+          
+            if (lowerCaseMessage.includes('hi') || lowerCaseMessage.includes('hello')) {
+              return 'Assistant: Hello! How can I assist you today?';
+            } else if (lowerCaseMessage.includes('progress report')) {
+              return 'Assistant: Of course! You can view detailed progress reports by navigating to the "Analytics" section.';
+            } else if (lowerCaseMessage.includes('eguru llm')) {
+              return 'Assistant: eGuru LLM is a specialized AI assistant designed to provide training information, answer queries, and offer personalized guidance based on your HAL Management Academy activities.';
+            } else if (lowerCaseMessage.includes('thanks') || lowerCaseMessage.includes('thankyou')) {
+              return 'Assistant: You’re welcome! Have a great day, and feel free to reach out anytime you need assistance.';
+            } else {
+              return 'Assistant: I\'m sorry, I didn\'t quite understand that. Could you please rephrase or ask something else?';
             }
         }
+        
+        function filterUsers() {
+            const filterValue = document.getElementById('userFilter').value;
+            const rows = document.querySelectorAll('#userTableBody tr');
+            rows.forEach(row => {
+              const role = row.children[2].textContent.trim().toLowerCase();
+              if (filterValue === 'all' || role === filterValue) {
+                row.style.display = '';
+              } else {
+                row.style.display = 'none';
+              }
+            });
+        }
+        document.getElementById('trainingCategoryFilter').addEventListener('change', filterTrainings);
+        document.getElementById('statusFilter').addEventListener('change', filterTrainings);
+        document.getElementById('trainingSearchInput').addEventListener('input', filterTrainings);
+      
+        function filterTrainings() {
+          const categoryFilter = document.getElementById('trainingCategoryFilter').value;
+          const statusFilter = document.getElementById('statusFilter').value;
+          const searchQuery = document.getElementById('trainingSearchInput').value.toLowerCase();
+          
+          const trainingCards = document.querySelectorAll('.training-card');
+          
+          trainingCards.forEach(card => {
+            const category = card.dataset.category;
+            const status = card.dataset.status;
+            const title = card.querySelector('.card-title').textContent.toLowerCase();
+            const description = card.querySelector('.card-text').textContent.toLowerCase();
+            
+            const matchesCategory = categoryFilter === 'all' || category === categoryFilter;
+            const matchesStatus = statusFilter === 'all' || status === statusFilter;
+            const matchesSearch = title.includes(searchQuery) || description.includes(searchQuery) || searchQuery === '';
+            
+            if (matchesCategory && matchesStatus && matchesSearch) {
+              card.style.display = '';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+        }
+
     </script>
 </body>
 </html>

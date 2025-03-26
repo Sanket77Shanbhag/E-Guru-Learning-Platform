@@ -17,13 +17,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from main import views
+from main.views import create_user
 
 urlpatterns = [
     path('', views.home, name='home'),
     path('signin/', views.signin, name='signin'),
     path('signup/', views.signup, name='signup'),
     path('signin/', views.signout, name='signout'),
-    path('admin/dashboard/', views.admin_dashboard, name='admin_dashboard'),
-    path('user/dashboard/', views.user_dashboard, name='user_dashboard'),
-    path('profile/', views.profile, name='profile'),
+    path('admin/dashboard/',views.admin_dashboard, name='admin_dashboard'),
+    path('user/dashboard/',views.user_dashboard, name='user_dashboard'),
+    path('create_user/', create_user, name='create_user'),
 ]

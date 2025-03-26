@@ -9,7 +9,7 @@
     <div class="container">
         <div class="signup-section">
             <h2>Sign Up</h2>
-            <form method="post" action="/signin/">
+            <form method="POST" action="{% url 'signup' %}">
                 {% csrf_token %}
                 <label for="pb_number">PB Number:</label>
                 <input type="text" id="pb_number" name="pb_number" required />
@@ -29,7 +29,6 @@
 
                 <label for="role">Role:</label>
                 <select id="role" name="role" required>
-                    <option value="admin">Admin</option>
                     <option value="user">User</option>
                 </select>
 
@@ -49,9 +48,9 @@
 
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: Roboto;
             background-image: url('/static/signInbackground.jpg');
-            background-size: cover;
+            background-size: cover;     
             margin: 0;
             display: flex;
             justify-content: center;
