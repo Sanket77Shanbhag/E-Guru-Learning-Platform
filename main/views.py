@@ -3,14 +3,17 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password, check_password
-from .forms import LoginForm, UserRegistrationForm
-from .models import User, users_collection
+from .forms import LoginForm, UserRegistrationForm, TrainingForm
+from .models import User, users_collection, Training
 from pymongo import MongoClient
+from datetime import datetime
+import os
 
 # MongoDB connection
 client = MongoClient('mongodb://localhost:27017/')
 db = client['eguru']
 users_collection = db['users']
+trainings_collection = db['trainings']
 
 def signin(request):
     if request.method == 'POST':
@@ -92,14 +95,74 @@ def signout(request):
 def home(request):
     return render(request, 'main/home.html')
 
-# Admin Dashboard with session validation
+def manage_trainings(request):
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        category = request.POST.get('category')
+        status = request.POST.get('status')
+        instructor_pb_number = request.POST.get('instructor_pb_number')
+        instructor_name = request.POST.get('instructor_name')
+        start_date = request.POST.get('start_date')
+        end_date = request.POST.get('end_date')
+        image = request.FILES.get('image')
 
+        if trainings_collection.find_one({"title": title, "instructor_pb_number": instructor_pb_number}):
+            messages.error(request, 'Training with this title and instructor already exists.')
+        elif not image:
+            messages.error(request, 'Please upload an image.')
+        else:
+            # Validate image size (Max 2MB)
+            if image.size > 2 * 1024 * 1024:
+                messages.error(request, 'Image size exceeds 2MB.')
+            else:
+                # Validate image format
+                valid_extensions = ['png', 'jpg', 'jpeg', 'webp']
+                if image.name.split('.')[-1].lower() not in valid_extensions:
+                    messages.error(request, 'Invalid image format.')
+                else:
+                    # Ensure the directory exists
+                    image_directory = os.path.join('static', 'training_images')
+                    os.makedirs(image_directory, exist_ok=True)
+
+                    # Save image to static folder
+                    image_path = os.path.join(image_directory, image.name)
+                    with open(image_path, 'wb+') as destination:
+                        for chunk in image.chunks():
+                            destination.write(chunk)
+
+                    # Calculate duration
+                    start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')
+                    end_date_obj = datetime.strptime(end_date, '%Y-%m-%d')
+                    duration_days = (end_date_obj - start_date_obj).days
+
+                    # Save to MongoDB
+                    training_data = {
+                        "title": title,
+                        "description": description,
+                        "category": category,
+                        "status": status,
+                        "instructor_pb_number": instructor_pb_number,
+                        "instructor_name": instructor_name,
+                        "start_date": start_date_obj,
+                        "end_date": end_date_obj,
+                        "duration": f"{duration_days} days",
+                        "image_url": image_path
+                    }
+                    trainings_collection.insert_one(training_data)
+                    messages.success(request, 'Training added successfully.')
+                    return redirect('admin_dashboard')
+
+    return render(request, 'main/admin_dashboard.html')
+
+# Admin Dashboard with session validation
 def admin_dashboard(request):
     # The middleware already verified that this is a valid admin user
     pb_number = request.session.get('pb_number')
     user_data = users_collection.find_one({"pb_number": pb_number})
     all_users = list(users_collection.find({}))
-    return render(request, 'main/admin_dashboard.html', {'all_users': all_users, 'admin': user_data})
+    all_trainings = list(trainings_collection.find({}))
+    return render(request, 'main/admin_dashboard.html', {'all_users': all_users, 'admin': user_data, 'all_trainings': all_trainings})
 
 def user_dashboard(request):
     pb_number = request.session.get('pb_number')

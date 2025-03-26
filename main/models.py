@@ -22,3 +22,37 @@ class User(AbstractUser):
         from django.contrib.auth.hashers import make_password
         self.password = make_password(self.password)
         super().save(*args, **kwargs)
+
+
+class Training(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    category = models.CharField(max_length=100, choices=[
+        ('aerodynamics', 'Aerodynamics'),
+        ('aviation', 'Aviation'),
+        ('personality-development', 'Personality Development'),
+        ('soft-skills', 'Soft Skills'),
+        ('corporate', 'Corporate'),
+        ('industry', 'Industry Knowledge'),
+    ])
+    status = models.CharField(max_length=50, choices=[
+        ('active', 'Active'),
+        ('upcoming', 'Upcoming'),
+        ('completed', 'Completed'),
+    ])
+    instructor_name = models.CharField(max_length=255)
+    instructor_pb_number = models.CharField(max_length=50)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    duration = models.CharField(max_length=50, blank=True)
+    image = models.ImageField(upload_to='training_images/')
+
+    def save(self, *args, **kwargs):
+        # Calculate duration
+        if self.start_date and self.end_date:
+            duration_days = (self.end_date - self.start_date).days
+            self.duration = f"{duration_days} days"
+        super(Training, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title

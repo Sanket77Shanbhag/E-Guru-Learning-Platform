@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,9 +9,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { background-color: #f8f8f8; font-family: 'Roboto', sans-serif; }
+        body { background-color: #f8f8f8; font-family: Roboto, sans-serif; }
         .layout { display: flex; height: 100vh; }
-        .sidebar { background-color: #f8f9fa; color: black; width: 250px; overflow-y: auto; position: sticky; top:0;  border-right: 1px solid #e9ecef; }
+        .sidebar { background-color: #f8f9fa; color: black; width: 250px; overflow-y: auto; position: sticky; top:0; border-right: 1px solid #e9ecef; }
         .sidebar img { width: 100%; margin-bottom: 20px; }
         .sidebar a { color: black; padding: 15px; display: block; }
         .sidebar a:hover, a.active { background-color: rgb(218, 236, 255); text-decoration: none; }
@@ -38,26 +39,12 @@
         .action-menu .menu-content a:hover { background-color: #f0f0f0; }
         .action-menu:hover .menu-content { display: block; }
         .add-user-btn { display: block }
-        #create-user-section { margin-top: 40px; padding: 20px; border: 1px solid #ccc; border-radius: 8px; background-color: #fff; width: 30%; }
-        #create-user-section input, #create-user-section select, #create-user-section button { margin-bottom: 10px; width: calc(100% - 20px); padding: 10px; }
-        .training-card .card {
-          transition: transform 0.3s;
-      }
-      .training-card .card:hover {
-          transform: translateY(-5px);
-      }
-      .training-card .card-img-top {
-          height: 140px; /* Reduced image height */
-          object-fit: cover;
-      }
-      .training-card .card-body {
-          padding: 12px;
-      }
-      .training-card .card-text {
-          font-size: 0.9rem;
-          height: 60px;
-          overflow: hidden;
-      }
+        .training-card .card { transition: transform 0.3s; }
+        .training-card .card:hover { transform: translateY(-5px); }
+        .training-card .card-img-top { height: 140px; object-fit: cover; }
+        .training-card .card-body { padding: 12px; }
+        .training-card .card-text { font-size: 0.9rem; height: 60px; overflow: hidden; }
+        
     </style>
 </head>
 <body>
@@ -71,7 +58,7 @@
                 <li class="nav-item"><a href="#manage-trainings" class="nav-link">⚙️ Manage Trainings</a></li>
                 <li class="nav-item"><a href="#manage-users" class="nav-link"><i class="fa fa-users-cog"></i> Manage Users</a></li>
                 <li class="nav-item"><a href="#manage-llm" class="nav-link"><i class="fa fa-robot"></i> Manage eGuru LLM</a></li>
-                <li class="nav-item"><button class="btn btn-dark w-100 mt-3" onclick="toggleChat">💬 Chat with eGuru</button></li>
+                <li class="nav-item"><button class="btn btn-dark w-100 mt-3" onclick="toggleChat()">💬 Chat with eGuru</button></li>
             </ul>
         </div>
 
@@ -100,202 +87,128 @@
             
             <!-- All Trainings -->
             <div id="all-trainings" class="content-section">
-              <div class="d-flex justify-content-between align-items-center mb-4">
-                <h4>All Trainings</h4>
-                <div class="d-flex">
-                  <input type="text" class="form-control me-2" placeholder="Search trainings..." id="trainingSearchInput">
-                  <select class="form-select me-2" style="width: auto;" id="trainingCategoryFilter">
-                    <option value="all">All Categories</option>
-                    <option value="technical">Technical</option>
-                    <option value="soft-skills">Soft Skills</option>
-                    <option value="leadership">Leadership</option>
-                    <option value="industry">Industry Knowledge</option>
-                  </select>
-                  <select class="form-select" style="width: auto;" id="statusFilter">
-                    <option value="all">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="upcoming">Upcoming</option>
-                    <option value="completed">Completed</option>
-                  </select>
-                </div>
+              <h4>All Trainings</h4>
+            
+              <div class="d-flex justify-content-end align-items-center mb-3">
+                <input type="text" class="form-control me-2" placeholder="Search trainings..." id="trainingSearchInput" onkeyup="filterTrainings()">
+                <select class="form-select me-2" id="trainingCategoryFilter" onchange="filterTrainings()">
+                  <option value="all">All Categories</option>
+                  <option value="aerodynamics">Aerodynamics</option>
+                  <option value="aviation">Aviation</option>
+                  <option value="personality-development">Personality Development</option>
+                  <option value="soft-skills">Soft Skills</option>
+                  <option value="corporate">Corporate</option>
+                  <option value="industry">Industry Knowledge</option>
+                </select>
+                <select class="form-select" id="statusFilter" onchange="filterTrainings()">
+                  <option value="all">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="upcoming">Upcoming</option>
+                  <option value="completed">Completed</option>
+                </select>
               </div>
-
-              <div class="row row-cols-1 row-cols-md-4 g-3" id="trainingsContainer">
-                <!-- Training Card 1 -->
-                <div class="col training-card" data-category="technical" data-status="active">
+            
+              <div class="row row-cols-1 row-cols-md-3 g-3" id="trainingsContainer">
+                {% for training in all_trainings %}
+                <div class="col training-card" data-category="{{ training.category }}" data-status="{{ training.status }}">
                   <div class="card h-100 shadow-sm">
                     <div class="position-relative">
-                      <img src="https://placehold.co/600x200/e9f5ff/003366?text=Python+Programming" class="card-img-top" alt="Python Programming">
-                      <span class="position-absolute top-0 end-0 badge bg-success m-2">Active</span>
+                      <img src="{% static training.image_url %}" class="card-img-top" alt="{{ training.title }}">
+                      <span class="position-absolute top-0 end-0 badge bg-{% if training.status == 'active' %}success{% elif training.status == 'upcoming' %}warning{% else %}secondary{% endif %} m-2">
+                        {{ training.status|title }}
+                      </span>
                     </div>
                     <div class="card-body">
-                      <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="card-title mb-0">Python Programming</h6>
-                        <span class="badge bg-primary">Technical</span>
-                      </div>
-                      <p class="card-text small">Learn Python programming fundamentals and advanced concepts for data analysis.</p>
-                      <div class="d-flex justify-content-between align-items-center mt-2">
-                        <small class="text-muted">8 Weeks</small>
-                        <small class="text-muted">42 users</small>
+                      <h6 class="card-title">{{ training.title }}</h6>
+                      <span class="badge bg-primary">{{ training.category|title }}</span>
+                      <p class="card-text small">{{ training.description }}</p>
+                      <p class="small text-muted">Instructor: {{ training.instructor_name }}</p>
+                      <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">{{ training.duration }}</small>
+                        <small class="text-muted">Start: {{ training.start_date|date:"Y-m-d" }}</small>
                       </div>
                     </div>
                     <div class="card-footer bg-transparent">
-                      <div class="d-flex justify-content-between">
-                        <button class="btn btn-sm btn-outline-primary">Details</button>
-                        <button class="btn btn-sm btn-success">Enroll</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Training Card 2 -->
-                <div class="col training-card" data-category="soft-skills" data-status="upcoming">
-                  <div class="card h-100 shadow-sm">
-                    <div class="position-relative">
-                      <img src="https://placehold.co/600x200/fff5e9/663300?text=Communication+Skills" class="card-img-top" alt="Communication Skills">
-                      <span class="position-absolute top-0 end-0 badge bg-warning m-2">Upcoming</span>
-                    </div>
-                    <div class="card-body">
-                      <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5 class="card-title mb-0">Communication Skills</h5>
-                        <span class="badge bg-info">Soft Skills</span>
-                      </div>
-                      <p class="card-text">Enhance your verbal and written communication skills for professional growth and team collaboration.</p>
-                      <div class="d-flex justify-content-between align-items-center mt-3">
-                        <small class="text-muted">Duration: 4 Weeks</small>
-                        <small class="text-muted">Enrolled: 28 users</small>
-                      </div>
-                    </div>
-                    <div class="card-footer bg-transparent d-flex justify-content-between">
-                      <button class="btn btn-sm btn-outline-primary">View Details</button>
+                      <button class="btn btn-sm btn-outline-primary">Details</button>
                       <button class="btn btn-sm btn-success">Enroll</button>
                     </div>
                   </div>
                 </div>
-
-                <!-- Training Card 3 -->
-                <div class="col training-card" data-category="leadership" data-status="active">
-                  <div class="card h-100 shadow-sm">
-                    <div class="position-relative">
-                      <img src="https://placehold.co/600x200/e9fff5/003633?text=Leadership+Development" class="card-img-top" alt="Leadership Development">
-                      <span class="position-absolute top-0 end-0 badge bg-success m-2">Active</span>
-                    </div>
-                    <div class="card-body">
-                      <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5 class="card-title mb-0">Leadership Development</h5>
-                        <span class="badge bg-danger">Leadership</span>
-                      </div>
-                      <p class="card-text">Develop essential leadership skills for managing teams and driving organizational success.</p>
-                      <div class="d-flex justify-content-between align-items-center mt-3">
-                        <small class="text-muted">Duration: 12 Weeks</small>
-                        <small class="text-muted">Enrolled: 18 users</small>
-                      </div>
-                    </div>
-                    <div class="card-footer bg-transparent d-flex justify-content-between">
-                      <button class="btn btn-sm btn-outline-primary">View Details</button>
-                      <button class="btn btn-sm btn-success">Enroll</button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Training Card 4 -->
-                <div class="col training-card" data-category="industry" data-status="completed">
-                  <div class="card h-100 shadow-sm">
-                    <div class="position-relative">
-                      <img src="https://placehold.co/600x200/f5e9ff/330066?text=Industry+Trends" class="card-img-top" alt="Industry Trends">
-                      <span class="position-absolute top-0 end-0 badge bg-secondary m-2">Completed</span>
-                    </div>
-                    <div class="card-body">
-                      <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5 class="card-title mb-0">Industry Trends 2025</h5>
-                        <span class="badge bg-dark">Industry</span>
-                      </div>
-                      <p class="card-text">Stay updated with the latest industry trends, technologies, and market developments.</p>
-                      <div class="d-flex justify-content-between align-items-center mt-3">
-                        <small class="text-muted">Duration: 6 Weeks</small>
-                        <small class="text-muted">Enrolled: 53 users</small>
-                      </div>
-                    </div>
-                    <div class="card-footer bg-transparent d-flex justify-content-between">
-                      <button class="btn btn-sm btn-outline-primary">View Details</button>
-                      <button class="btn btn-sm btn-outline-secondary" disabled>Completed</button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Training Card 5 -->
-                <div class="col training-card" data-category="technical" data-status="active">
-                  <div class="card h-100 shadow-sm">
-                    <div class="position-relative">
-                      <img src="https://placehold.co/600x200/e9f5ff/003366?text=Data+Science" class="card-img-top" alt="Data Science">
-                      <span class="position-absolute top-0 end-0 badge bg-success m-2">Active</span>
-                    </div>
-                    <div class="card-body">
-                      <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5 class="card-title mb-0">Data Science Fundamentals</h5>
-                        <span class="badge bg-primary">Technical</span>
-                      </div>
-                      <p class="card-text">Explore data analysis, visualization, and machine learning techniques for business insights.</p>
-                      <div class="d-flex justify-content-between align-items-center mt-3">
-                        <small class="text-muted">Duration: 10 Weeks</small>
-                        <small class="text-muted">Enrolled: 37 users</small>
-                      </div>
-                    </div>
-                    <div class="card-footer bg-transparent d-flex justify-content-between">
-                      <button class="btn btn-sm btn-outline-primary">View Details</button>
-                      <button class="btn btn-sm btn-success">Enroll</button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Training Card 6 -->
-                <div class="col training-card" data-category="soft-skills" data-status="upcoming">
-                  <div class="card h-100 shadow-sm">
-                    <div class="position-relative">
-                      <img src="https://placehold.co/600x200/fff5e9/663300?text=Time+Management" class="card-img-top" alt="Time Management">
-                      <span class="position-absolute top-0 end-0 badge bg-warning m-2">Upcoming</span>
-                    </div>
-                    <div class="card-body">
-                      <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5 class="card-title mb-0">Time Management</h5>
-                        <span class="badge bg-info">Soft Skills</span>
-                      </div>
-                      <p class="card-text">Master effective time management strategies to boost productivity and work-life balance.</p>
-                      <div class="d-flex justify-content-between align-items-center mt-3">
-                        <small class="text-muted">Duration: 3 Weeks</small>
-                        <small class="text-muted">Enrolled: 25 users</small>
-                      </div>
-                    </div>
-                    <div class="card-footer bg-transparent d-flex justify-content-between">
-                      <button class="btn btn-sm btn-outline-primary">View Details</button>
-                      <button class="btn btn-sm btn-success">Enroll</button>
-                    </div>
-                  </div>
-                </div>
+                {% endfor %}
               </div>
-
-              <!-- Pagination -->
-              <nav aria-label="Training pagination" class="mt-5">
-                <ul class="pagination justify-content-center">
-                  <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1">Previous</a>
-                  </li>
-                  <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                  <li class="page-item"><a class="page-link" href="#">2</a></li>
-                  <li class="page-item"><a class="page-link" href="#">3</a></li>
-                  <li class="page-item">
-                    <a class="page-link" href="#">Next</a>
-                  </li>
-                </ul>
-              </nav>
             </div>
+                
 
-
-
+              
             <!-- Manage Trainings -->
-            <div id="manage-trainings" class="content-section">Manage Trainings Content</div>
-
-
+            
+            <div id="manage-trainings" class="content-section" style="display: none; justify-content: center; align-items: center; height: 100vh;">
+              <div class="card p-4 shadow-lg" style="width: 500px;">
+                <h4 class="mb-4 text-center">Add New Trainings</h4>
+                <form id="trainingForm" action="{% url 'manage_trainings' %}" method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  
+                  <div class="mb-3">
+                    <label for="title" class="form-label">Training Title</label>
+                    <input type="text" class="form-control" id="title" name="title" required>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" required></textarea>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label for="category" class="form-label">Category</label>
+                    <select class="form-select" id="category" name="category" required>
+                      <option value="aerodynamics">Aerodynamics</option>
+                      <option value="aviation">Aviation</option>
+                      <option value="personality-development">Personality Development</option>
+                      <option value="soft-skills">Soft Skills</option>
+                      <option value="corporate">Corporate</option>
+                      <option value="industry">Industry Knowledge</option>
+                    </select>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status" required>
+                      <option value="active">Active</option>
+                      <option value="upcoming">Upcoming</option>
+                      <option value="completed">Completed</option>
+                    </select>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label for="instructor_pb_number" class="form-label">Instructor PB Number</label>
+                    <input type="text" class="form-control" id="instructor_pb_number" name="instructor_pb_number" required>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label for="instructor_name" class="form-label">Instructor Name</label>
+                    <input type="text" class="form-control" id="instructor_name" name="instructor_name" required>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label for="start_date" class="form-label">Start Date</label>
+                    <input type="date" class="form-control" id="start_date" name="start_date" required>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label for="end_date" class="form-label">End Date</label>
+                    <input type="date" class="form-control" id="end_date" name="end_date" required>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label for="image" class="form-label">Upload Image (Max 2MB, PNG/JPG/JPEG/WEBP)</label>
+                    <input type="file" class="form-control" id="image" name="image" accept="image/png, image/jpg, image/jpeg, image/webp" required>
+                  </div>
+                  
+                  <button type="submit" class="btn btn-success w-100">Add Training</button>
+                </form>
+                </div>
+            </div>
+            
             <!-- Manage Users -->
             <div id="manage-users" class="content-section">
                 <div class="filter-container">
@@ -338,30 +251,59 @@
                   </tbody>
                 </table>
             </div>
-            <div id="create-user-section" class="content-section" style="display: none;">
-              <h5>Create User</h5>
-              <form method="post" action="{% url 'create_user' %}">
+
+            <!-- Create User Section -->
+            <div id="create-user-section" class="content-section justify-content-center align-items-center" style="height: 74vh;">
+              <div class="card p-4 shadow-lg" style="width: 500px;">
+                <h4 class="mb-4 text-center">Create User</h4>
+                <form method="post" action="{% url 'create_user' %}">
                   {% csrf_token %}
-                  <input type="text" name="pb_number" placeholder="PB Number" required />
-                  <input type="password" name="password" placeholder="Password" required />
-                  <input type="text" name="name" placeholder="Name" required />
-                  <select name="gender" required>
+                  <div class="mb-3">
+                    <label for="pb_number" class="form-label">PB Number</label>
+                    <input type="text" class="form-control" id="pb_number" name="pb_number" required />
+                  </div>
+                  <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" required />
+                  </div>
+                  <div class="mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required />
+                  </div>
+                  <div class="mb-3">
+                    <label for="gender" class="form-label">Gender</label>
+                    <select class="form-select" id="gender" name="gender" required>
                       <option value="">Select Gender</option>
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
                       <option value="Other">Other</option>
-                  </select>
-                  <select name="role" required>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="role" class="form-label">Role</label>
+                    <select class="form-select" id="role" name="role" required>
                       <option value="">Select Role</option>
                       <option value="Admin">Admin</option>
                       <option value="User">User</option>
-                  </select>
-                  <input type="text" name="division" placeholder="Division" />
-                  <input type="text" name="department" placeholder="Department" />
-                  <input type="text" name="designation" placeholder="Designation" />
-                  <button type="submit" class="btn btn-success">Create User</button>
-              </form>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="division" class="form-label">Division</label>
+                    <input type="text" class="form-control" id="division" name="division" />
+                  </div>
+                  <div class="mb-3">
+                    <label for="department" class="form-label">Department</label>
+                    <input type="text" class="form-control" id="department" name="department" />
+                  </div>
+                  <div class="mb-3">
+                    <label for="designation" class="form-label">Designation</label>
+                    <input type="text" class="form-control" id="designation" name="designation" />
+                  </div>
+                  <button type="submit" class="btn btn-success w-100">Create User</button>
+                </form>
+              </div>
             </div>
+            
           
               
 
@@ -497,27 +439,21 @@
         document.getElementById('trainingSearchInput').addEventListener('input', filterTrainings);
       
         function filterTrainings() {
+          const searchInput = document.getElementById('trainingSearchInput').value.toLowerCase();
           const categoryFilter = document.getElementById('trainingCategoryFilter').value;
           const statusFilter = document.getElementById('statusFilter').value;
-          const searchQuery = document.getElementById('trainingSearchInput').value.toLowerCase();
-          
-          const trainingCards = document.querySelectorAll('.training-card');
-          
-          trainingCards.forEach(card => {
-            const category = card.dataset.category;
-            const status = card.dataset.status;
+          const cards = document.querySelectorAll('.training-card');
+        
+          cards.forEach(card => {
             const title = card.querySelector('.card-title').textContent.toLowerCase();
-            const description = card.querySelector('.card-text').textContent.toLowerCase();
-            
+            const category = card.getAttribute('data-category');
+            const status = card.getAttribute('data-status');
+        
+            const matchesSearch = title.includes(searchInput);
             const matchesCategory = categoryFilter === 'all' || category === categoryFilter;
             const matchesStatus = statusFilter === 'all' || status === statusFilter;
-            const matchesSearch = title.includes(searchQuery) || description.includes(searchQuery) || searchQuery === '';
-            
-            if (matchesCategory && matchesStatus && matchesSearch) {
-              card.style.display = '';
-            } else {
-              card.style.display = 'none';
-            }
+        
+            card.style.display = matchesSearch && matchesCategory && matchesStatus ? 'block' : 'none';
           });
         }
 

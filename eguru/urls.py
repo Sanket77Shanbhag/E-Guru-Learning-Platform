@@ -17,7 +17,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from main import views
-from main.views import create_user
+from django.conf import settings
+from django.conf.urls.static import static
+from main.views import create_user, manage_trainings
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -27,4 +29,5 @@ urlpatterns = [
     path('admin/dashboard/',views.admin_dashboard, name='admin_dashboard'),
     path('user/dashboard/',views.user_dashboard, name='user_dashboard'),
     path('create_user/', create_user, name='create_user'),
-]
+    path('manage_trainings/', manage_trainings, name='manage_trainings'),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
