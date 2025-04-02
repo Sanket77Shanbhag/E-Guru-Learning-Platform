@@ -44,7 +44,6 @@
         .training-card .card-img-top { height: 140px; object-fit: cover; }
         .training-card .card-body { padding: 12px; }
         .training-card .card-text { font-size: 0.9rem; height: 60px; overflow: hidden; }
-        
     </style>
 </head>
 <body>
@@ -87,8 +86,7 @@
             
             <!-- All Trainings -->
             <div id="all-trainings" class="content-section">
-              <h4>All Trainings</h4>
-            
+              <h4>All Trainings</h4>              
               <div class="d-flex justify-content-end align-items-center mb-3">
                 <input type="text" class="form-control me-2" placeholder="Search trainings..." id="trainingSearchInput" onkeyup="filterTrainings()">
                 <select class="form-select me-2" id="trainingCategoryFilter" onchange="filterTrainings()">
@@ -137,11 +135,8 @@
                 {% endfor %}
               </div>
             </div>
-                
 
-              
-            <!-- Manage Trainings -->
-            
+            <!-- Manage Trainings -->    
             <div id="manage-trainings" class="content-section" style="display: none; justify-content: center; align-items: center; height: 100vh;">
               <div class="card p-4 shadow-lg" style="width: 500px;">
                 <h4 class="mb-4 text-center">Add New Trainings</h4>
@@ -164,9 +159,9 @@
                       <option value="aerodynamics">Aerodynamics</option>
                       <option value="aviation">Aviation</option>
                       <option value="personality-development">Personality Development</option>
-                      <option value="soft-skills">Soft Skills</option>
+                      <option value="technical">Technical</option>
                       <option value="corporate">Corporate</option>
-                      <option value="industry">Industry Knowledge</option>
+                      <option value="management">Management</option>
                     </select>
                   </div>
                   
@@ -304,9 +299,7 @@
               </div>
             </div>
             
-          
-              
-
+            <!-- Manage eGuru LLM Content -->
             <div id="manage-llm" class="content-section">Manage eGuru LLM Content</div>
         </div>
 

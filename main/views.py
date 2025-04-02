@@ -34,7 +34,7 @@ def signin(request):
         else:
             messages.error(request, 'Invalid PB Number or Password')
 
-    return render(request, 'main/signin.html')
+    return render(request, 'signin.html')
 
 def signup(request):
     if request.method == 'POST':
@@ -66,7 +66,7 @@ def signup(request):
             messages.success(request, 'Account created successfully. Please sign in.')
             return redirect('signin')
 
-    return render(request, 'main/signup.html')
+    return render(request, 'signup.html')
 
 
 def signout(request):
@@ -93,7 +93,7 @@ def signout(request):
     return redirect('signin')
 
 def home(request):
-    return render(request, 'main/home.html')
+    return render(request, 'home.html')
 
 def manage_trainings(request):
     if request.method == 'POST':
@@ -122,7 +122,7 @@ def manage_trainings(request):
                     messages.error(request, 'Invalid image format.')
                 else:
                     # Ensure the directory exists
-                    image_directory = os.path.join('static', 'training_images')
+                    image_directory = os.path.join('training_images')
                     os.makedirs(image_directory, exist_ok=True)
 
                     # Save image to static folder
@@ -153,7 +153,7 @@ def manage_trainings(request):
                     messages.success(request, 'Training added successfully.')
                     return redirect('admin_dashboard')
 
-    return render(request, 'main/admin_dashboard.html')
+    return render(request, 'admin_dashboard.html')
 
 # Admin Dashboard with session validation
 def admin_dashboard(request):
@@ -162,12 +162,13 @@ def admin_dashboard(request):
     user_data = users_collection.find_one({"pb_number": pb_number})
     all_users = list(users_collection.find({}))
     all_trainings = list(trainings_collection.find({}))
-    return render(request, 'main/admin_dashboard.html', {'all_users': all_users, 'admin': user_data, 'all_trainings': all_trainings})
+    return render(request, 'admin_dashboard.html', {'all_users': all_users, 'admin': user_data, 'all_trainings': all_trainings})
 
 def user_dashboard(request):
     pb_number = request.session.get('pb_number')
     user_data = users_collection.find_one({"pb_number": pb_number})
-    return render(request, 'main/user_dashboard.html', {'user': user_data})
+    all_trainings = list(trainings_collection.find({}))
+    return render(request, 'user_dashboard.html', {'user': user_data, 'all_trainings': all_trainings})
 
 def create_user(request):
     if request.method == 'POST':
@@ -197,13 +198,7 @@ def create_user(request):
             users_collection.insert_one(user_data)
             messages.success(request, 'User created successfully.')        
         return redirect('admin_dashboard')
-    return render(request, 'main/admin_dashboard.html')
-
-def profile(request):
-    # The middleware already verified that this is a valid user
-    pb_number = request.session.get('pb_number')
-    user_data = users_collection.find_one({"pb_number": pb_number})
-    return render(request, 'main/profile.html', {'user_data': user_data})
+    return render(request, 'admin_dashboard.html')
 
 
 def edit_user(request, user_id):

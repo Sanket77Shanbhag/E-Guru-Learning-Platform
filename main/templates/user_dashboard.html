@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,8 +29,12 @@
         #robot-circle img {width: 50px; height: 50px;}
         .stats-container { display: flex; justify-content: space-around; margin-top: 20px; }
         .stat-card { background-color: #fff; border-radius: 8px; padding: 20px; text-align: center; width: 30%; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
-        .stat-icon { font-size: 24px; margin-bottom: 10px; }
-        #training-list { margin-top: 20px; }
+        .stat-icon { font-size: 24px; margin-bottom: 10px; }        
+        .training-card .card { transition: transform 0.3s; }
+        .training-card .card:hover { transform: translateY(-5px); }
+        .training-card .card-img-top { height: 140px; object-fit: cover; }
+        .training-card .card-body { padding: 12px; }
+        .training-card .card-text { font-size: 0.9rem; height: 60px; overflow: hidden; }
         .progress { height: 20px; }
     </style>
 </head>
@@ -92,9 +97,58 @@
                 <canvas id="analyticsChart"></canvas>
             </div>
 
-            <div id="all-trainings" class="content-section">All Trainings Content</div>
+            <div id="all-trainings" class="content-section">
+                <h4>All Trainings</h4>              
+                <div class="d-flex justify-content-end align-items-center mb-3">
+                  <input type="text" class="form-control me-2" placeholder="Search trainings..." id="trainingSearchInput" onkeyup="filterTrainings()">
+                  <select class="form-select me-2" id="trainingCategoryFilter" onchange="filterTrainings()">
+                    <option value="all">All Categories</option>
+                    <option value="aerodynamics">Aerodynamics</option>
+                    <option value="aviation">Aviation</option>
+                    <option value="personality-development">Personality Development</option>
+                    <option value="soft-skills">Soft Skills</option>
+                    <option value="corporate">Corporate</option>
+                    <option value="industry">Industry Knowledge</option>
+                  </select>
+                  <select class="form-select" id="statusFilter" onchange="filterTrainings()">
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="upcoming">Upcoming</option>
+                    <option value="completed">Completed</option>
+                  </select>
+                </div>
+              
+                <div class="row row-cols-1 row-cols-md-3 g-3" id="trainingsContainer">
+                  {% for training in all_trainings %}
+                  <div class="col training-card" data-category="{{ training.category }}" data-status="{{ training.status }}">
+                    <div class="card h-100 shadow-sm">
+                      <div class="position-relative">
+                        <img src="{% static training.image_url %}" class="card-img-top" alt="{{ training.title }}">
+                        <span class="position-absolute top-0 end-0 badge bg-{% if training.status == 'active' %}success{% elif training.status == 'upcoming' %}warning{% else %}secondary{% endif %} m-2">
+                          {{ training.status|title }}
+                        </span>
+                      </div>
+                      <div class="card-body">
+                        <h6 class="card-title">{{ training.title }}</h6>
+                        <span class="badge bg-primary">{{ training.category|title }}</span>
+                        <p class="card-text small">{{ training.description }}</p>
+                        <p class="small text-muted">Instructor: {{ training.instructor_name }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                          <small class="text-muted">{{ training.duration }}</small>
+                          <small class="text-muted">Start: {{ training.start_date|date:"Y-m-d" }}</small>
+                        </div>
+                      </div>
+                      <div class="card-footer bg-transparent">
+                        <button class="btn btn-sm btn-outline-primary">Details</button>
+                        <button class="btn btn-sm btn-success">Enroll</button>
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
 
-        </div>
+            </div>
 
         <!-- Chat with Assistant -->
         <div id="robot-circle" onclick="toggleChat1()">
@@ -159,7 +213,7 @@
         }
 
         function eguruChat(){
-            const chatBox = document.getElementById('chatBox1');
+            const chatBox = document.getElementById('eguru');
             chatBox.style.display = chatBox.style.display === 'block' ? 'none' : 'block';
             document.getElementById('messageInput').value = "Hello Assistant!";
             sendMessage();
@@ -212,6 +266,29 @@
             } else {
               return 'Assistant: I\'m sorry, I didn\'t quite understand that. Could you please rephrase or ask something else?';
             }
+        }
+
+        document.getElementById('trainingCategoryFilter').addEventListener('change', filterTrainings);
+        document.getElementById('statusFilter').addEventListener('change', filterTrainings);
+        document.getElementById('trainingSearchInput').addEventListener('input', filterTrainings);
+      
+        function filterTrainings() {
+          const searchInput = document.getElementById('trainingSearchInput').value.toLowerCase();
+          const categoryFilter = document.getElementById('trainingCategoryFilter').value;
+          const statusFilter = document.getElementById('statusFilter').value;
+          const cards = document.querySelectorAll('.training-card');
+        
+          cards.forEach(card => {
+            const title = card.querySelector('.card-title').textContent.toLowerCase();
+            const category = card.getAttribute('data-category');
+            const status = card.getAttribute('data-status');
+        
+            const matchesSearch = title.includes(searchInput);
+            const matchesCategory = categoryFilter === 'all' || category === categoryFilter;
+            const matchesStatus = statusFilter === 'all' || status === statusFilter;
+        
+            card.style.display = matchesSearch && matchesCategory && matchesStatus ? 'block' : 'none';
+          });
         }
 
     </script>
