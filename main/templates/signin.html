@@ -1,114 +1,236 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>eGuru - Sign In</title>
-</head>
-<body>
-    
-    <div class="container">
-        <div class="welcome-section">
-            <img src="/static/eguru.webp" alt="eGuru Logo" class="logo" />
-            <h1>Welcome to the HAL e-Learning Platform</h1> 
-            <img src="/static/HALlogo.jpg" alt="HAL Logo" class="hal-logo" />
-        </div>
-        
-        <div class="spacer"></div>
-        
-        <div class="signin-section">
-            <h2>Sign In</h2>
-            <form method="POST">
-                {% csrf_token %}
-                <label for="pb_number">PB Number:</label>
-                <input type="text" id="pb_number" name="pb_number" required />
-
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required />
-
-                <button type="submit">Sign In</button>
-            </form>
-        </div>
-    </div>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #6e48aa;
+            --secondary: #9d50bb;
+            --accent: #ff6584;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --success: #28a745;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
         body {
-            font-family: Roboto;
             background-image: url('/static/signInbackground.jpg');
             background-size: cover;
-            margin: 0;
+            background-position: center;
+            background-attachment: fixed;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
+            padding: 20px;
         }
-
+        
         .container {
             display: flex;
-            gap: 70px;
-        }
-
-        .welcome-section, .signin-section {
-            background-color: #FDFCE8;
-            padding: 40px;
-            border-radius: 10px;
+            width: 100%;
+            max-width: 900px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            position: relative;
         }
-
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+        
         .welcome-section {
             flex: 1;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             text-align: center;
-            max-width: 450px;
+            background: linear-gradient(135deg, rgba(110, 72, 170, 0.1) 0%, rgba(157, 80, 187, 0.1) 100%);
         }
-
+        
         .logo {
-            width: 200px;
+            width: 180px;
+            margin-bottom: 30px;
         }
-
+        
         .hal-logo {
-            width: 150px;
-            margin-top: 20px;
+            width: 140px;
+            margin-top: 30px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
         }
-
+        
+        .welcome-section h1 {
+            font-size: 1.8rem;
+            color: var(--dark);
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+        
         .signin-section {
             flex: 1;
-            max-width: 300px;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
-
-        .spacer {
-            width: 50px;
+        
+        .signin-section h2 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+            padding-bottom: 10px;
         }
-
+        
+        .signin-section h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+        
         form {
             display: flex;
             flex-direction: column;
         }
-
-        label {
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-
-        input {
-            padding: 10px;
+        
+        .form-group {
             margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
         }
-
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        
+        input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(110, 72, 170, 0.2);
+            background-color: white;
+        }
+        
         button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 5px;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: 600;
             cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            border: none;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            margin-top: 10px;
         }
-
+        
         button:hover {
-            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(110, 72, 170, 0.4);
+        }
+        
+        .signup-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+        
+        .signup-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .welcome-section, .signin-section {
+                padding: 40px 30px;
+            }
+            
+            .welcome-section h1 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                width: 95%;
+            }
         }
     </style>
+</head>
+<body>
+    <div class="container">
+        <div class="welcome-section">
+            <img src="/static/eguru.webp" alt="eGuru Logo" class="logo" />
+            <h1>Welcome to the HAL e-Learning Platform</h1>
+            <img src="/static/HALlogo.jpg" alt="HAL Logo" class="hal-logo" />
+        </div>
+        
+        <div class="signin-section">
+            <h2>Sign In</h2>
+            <form method="POST" action="{% url 'signin' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="pb_number">PB Number</label>
+                    <input type="text" id="pb_number" name="pb_number" required />
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required />
+                </div>
+                
+                <button type="submit">Sign In</button>
+                
+                <div class="signup-link">
+                    Don't have an account? <a href="{% url 'signup' %}">Sign Up</a>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
