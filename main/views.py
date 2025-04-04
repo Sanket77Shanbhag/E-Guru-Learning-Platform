@@ -8,12 +8,14 @@ from .models import User, users_collection, Training
 from pymongo import MongoClient
 from datetime import datetime
 import os
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 # MongoDB connection
 client = MongoClient('mongodb://localhost:27017/')
 db = client['eguru']
 users_collection = db['users']
 trainings_collection = db['trainings']
+llm_collection = db['document']
 
 def signin(request):
     if request.method == 'POST':
@@ -155,6 +157,48 @@ def manage_trainings(request):
 
     return render(request, 'admin_dashboard.html')
 
+def manage_llm(request):
+    if request.method == "POST" and request.FILES.get("document"):
+        document = request.FILES["document"]
+        document_name = document.name.split('.')[0]
+
+        if llm_collection.find_one({"name": document_name}):
+            messages.error(request, 'Document with this name already exists.')
+        elif not document:
+            messages.error(request, 'Please upload a document.')
+        else:
+            # Validate file size (Max 100MB)
+            if document.size > 100 * 1024 * 1024:
+                messages.error(request, 'File size exceeds 100MB.')
+            else:
+                # Validate file type
+                valid_extensions = ['pdf', 'ppt', 'pptx', 'doc', 'docx']
+                if document.name.split('.')[-1].lower() not in valid_extensions:
+                    messages.error(request, 'Invalid file format.')
+                else:
+                    # Ensure directory exists
+                    document_directory = os.path.join('media', 'llm_documents')
+                    os.makedirs(document_directory, exist_ok=True)
+
+                    # Save document to media folder
+                    document_path = os.path.join(document_directory, document.name)
+                    with open(document_path, 'wb+') as destination:
+                        for chunk in document.chunks():
+                            destination.write(chunk)
+
+                    # Save to MongoDB
+                    document_data = {
+                        "name": document_name,
+                        "type": document.name.split('.')[-1].upper(),
+                        "upload_date": datetime.now(),
+                        "file_url": f"/media/llm_documents/{document.name}"
+                    }
+                    llm_collection.insert_one(document_data)
+                    messages.success(request, 'Document uploaded successfully.')
+                    return redirect('admin_dashboard')
+
+    return render(request, 'admin_dashboard.html')
+
 # Admin Dashboard with session validation
 def admin_dashboard(request):
     # The middleware already verified that this is a valid admin user
@@ -162,7 +206,10 @@ def admin_dashboard(request):
     user_data = users_collection.find_one({"pb_number": pb_number})
     all_users = list(users_collection.find({}))
     all_trainings = list(trainings_collection.find({}))
-    return render(request, 'admin_dashboard.html', {'all_users': all_users, 'admin': user_data, 'all_trainings': all_trainings})
+    uploaded_documents = list(llm_collection.find({}))
+    for doc in uploaded_documents:
+        doc["id"] = str(doc["_id"])
+    return render(request, 'admin_dashboard.html', {'all_users': all_users, 'admin': user_data, 'all_trainings': all_trainings, "uploaded_documents": uploaded_documents})
 
 def user_dashboard(request):
     pb_number = request.session.get('pb_number')

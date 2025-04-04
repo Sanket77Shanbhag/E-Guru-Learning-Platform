@@ -9,6 +9,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+      :root {
+        --primary-color: #6e48aa;
+        --secondary-color: #9d50bb;
+        --bg-color: #f5f7fa;
+        --chat-bg: #ffffff;
+        --user-msg: #f0f4ff;
+        --bot-msg: #ffffff;
+        --text-color: #333333;
+        --border-color: #e0e0e0;
+        }
         body { background-color: #f8f8f8; font-family: 'Roboto', sans-serif; }
         .layout { display: flex; height: 100vh; }
         .sidebar { background-color: #f8f9fa; color: black; width: 250px; overflow-y: auto; }
@@ -36,6 +46,179 @@
         .training-card .card-body { padding: 12px; }
         .training-card .card-text { font-size: 0.9rem; height: 60px; overflow: hidden; }
         .progress { height: 20px; }
+        .chat-container {
+          display: flex;
+          flex-direction: column;
+          max-width: 900px;
+          height: 90vh;
+          margin: 20px auto;
+          border-radius: 12px;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+          overflow: hidden;
+          background-color: var(--chat-bg);
+      }
+
+      .chat-header {
+          background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+          color: white;
+          padding: 15px 20px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+      }
+
+      .chat-header h2 {
+          margin: 0;
+          font-weight: 600;
+      }
+
+      .chat-messages {
+          margin-right: 20px;
+          flex: 1;
+          padding: 20px;
+          overflow-y: auto;
+          background-color: var(--chat-bg);
+      }
+
+      .message {
+          margin-bottom: 20px;
+          display: flex;
+          flex-direction: column;
+          max-width: 80%;
+      }
+
+      .user-message {
+          align-self: flex-end;
+          background-color: var(--user-msg);
+          border-radius: 18px 18px 0 18px;
+      }
+
+      .bot-message {
+          align-self: flex-start;
+          background-color: var(--bot-msg);
+          border: 1px solid var(--border-color);
+          border-radius: 18px 18px 18px 0;
+      }
+
+      .message-content {
+          padding: 12px 16px;
+      }
+
+      .message-info {
+          font-size: 0.8rem;
+          color: #777;
+          margin-top: 4px;
+          display: flex;
+          align-items: center;
+      }
+
+      .input-area {
+          display: flex;
+          padding: 15px;
+          border-top: 1px solid var(--border-color);
+          background-color: var(--chat-bg);
+      }
+
+      #messageInput {
+          flex: 1;
+          padding: 12px 15px;
+          border: 1px solid var(--border-color);
+          border-radius: 24px;
+          outline: none;
+          font-size: 1rem;
+          transition: border 0.3s;
+      }
+
+      #messageInput:focus {
+          border-color: var(--primary-color);
+      }
+
+      #sendButton {
+          background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+          color: white;
+          border: none;
+          border-radius: 24px;
+          padding: 0 20px;
+          margin-left: 10px;
+          cursor: pointer;
+          font-size: 1rem;
+          transition: transform 0.2s, opacity 0.2s;
+      }
+
+      #sendButton:hover {
+          opacity: 0.9;
+          transform: scale(1.02);
+      }
+
+      #sendButton:active {
+          transform: scale(0.98);
+      }
+
+      .typing-indicator {
+          display: none;
+          padding: 10px 15px;
+          background-color: var(--bot-msg);
+          border-radius: 18px 18px 18px 0;
+          align-self: flex-start;
+          margin-bottom: 10px;
+          border: 1px solid var(--border-color);
+      }
+
+      .typing-dots {
+          display: flex;
+          padding: 10px 0;
+      }
+
+      .typing-dot {
+          width: 8px;
+          height: 8px;
+          background-color: #999;
+          border-radius: 50%;
+          margin: 0 2px;
+          animation: typingAnimation 1.4s infinite ease-in-out;
+      }
+
+      .typing-dot:nth-child(1) { animation-delay: 0s; }
+      .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+      .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+      @keyframes typingAnimation {
+          0%, 60%, 100% { transform: translateY(0); }
+          30% { transform: translateY(-5px); }
+      }
+
+      .logo2 {
+          width: 50px;
+          height: 40px;
+          margin-right: 10px;
+      }
+
+      .header-left {
+          display: flex;
+          align-items: center;
+      }
+
+      .suggestions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+          padding: 10px 20px;
+          border-top: 1px solid var(--border-color);
+      }
+
+      .suggestion-btn {
+          background-color: var(--user-msg);
+          border: none;
+          border-radius: 16px;
+          padding: 8px 15px;
+          font-size: 0.9rem;
+          cursor: pointer;
+          transition: background-color 0.2s;
+      }
+
+      .suggestion-btn:hover {
+        background-color: #e0e8ff;
+      }
     </style>
 </head>
 <body>
@@ -47,7 +230,7 @@
                 <li class="nav-item"><a href="#dashboard" class="nav-link"><i class="fa fa-layer-group"></i> Dashboard</a></li>
                 <li class="nav-item"><a href="#analytics" class="nav-link"><i class="fa fa-chart-area"></i>  Analytics</a></li>
                 <li class="nav-item"><a href="#all-trainings" class="nav-link"><i class="fa fa-book-reader"></i> All Trainings</a></li>
-                <li class="nav-item"><a href="#manage-trainings" class="nav-link"><button class="btn btn-dark w-100 mt-3" onclick="eguruChat()">💬 Chat with eGuru</button></li>
+                <li class="nav-item"><a href="#eguru-chatbot" class="nav-link"><button class="btn btn-dark w-100 mt-3" >💬 Chat with eGuru</button></a></li>
             </ul>
         </div>
 
@@ -135,7 +318,7 @@
                         <p class="small text-muted">Instructor: {{ training.instructor_name }}</p>
                         <div class="d-flex justify-content-between align-items-center">
                           <small class="text-muted">{{ training.duration }}</small>
-                          <small class="text-muted">Start: {{ training.start_date|date:"Y-m-d" }}</small>
+                          <small class="text-muted">Start: {{ training.start_date|date:"d-m-Y" }}</br>End: {{ training.end_date|date:"d-m-Y" }}</small>
                         </div>
                       </div>
                       <div class="card-footer bg-transparent">
@@ -146,11 +329,52 @@
                   </div>
                   {% endfor %}
                 </div>
-              </div>
-
             </div>
-
-        <!-- Chat with Assistant -->
+              <!-- Eguru Chatbot Section -->
+            <div id="eguru-chatbot" class="content-section" style="display: none;">
+              <div class="chat-container">
+                <div class="chat-header">
+                    <div class="header-left">
+                        <img src="/static/icon.webp" alt="eGuru Logo" class="logo2">
+                        <h2>eGuru Assistant</h2>
+                    </div>
+                    <div>v1.0</div>
+                </div>
+        
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message bot-message">
+                        <div class="message-content">
+                            Hello! I'm eGuru, your AI assistant. How can I help you today?
+                        </div>
+                        <div class="message-info">
+                            <span>eGuru • Just now</span>
+                        </div>
+                    </div>
+        
+                    <div class="typing-indicator" id="typingIndicator">
+                        <div class="typing-dots">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="suggestions">
+                    <button class="suggestion-btn">What is eGuru?</button>
+                    <button class="suggestion-btn">How to use this platform?</button>
+                    <button class="suggestion-btn">Troubleshooting help</button>
+                    <button class="suggestion-btn">Latest features</button>
+                </div>
+        
+                <div class="input-area">
+                    <input type="text" id="messageInput" placeholder="Message eGuru..." autocomplete="off">
+                    <button id="sendButton">Send</button>
+                </div>
+            </div>          
+        </div>
+        
+            <!-- Chat with Assistant -->
         <div id="robot-circle" onclick="toggleChat1()">
             <img src="https://cdn-icons-png.flaticon.com/512/4712/4712043.png" alt="Robot Logo" />
         </div>
@@ -290,6 +514,81 @@
             card.style.display = matchesSearch && matchesCategory && matchesStatus ? 'block' : 'none';
           });
         }
+
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        // Handle sending messages
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message === '') return;
+
+            // Add user message to chat
+            addMessage(message, 'user');
+            messageInput.value = '';
+            
+            // Show typing indicator
+            typingIndicator.style.display = 'block';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Simulate bot response after a delay
+            setTimeout(() => {
+                typingIndicator.style.display = 'none';
+                const botResponse = getBotResponse(message);
+                addMessage(botResponse, 'bot');
+            }, 1000 + Math.random() * 2000);
+        }
+
+        // Add a message to the chat
+        function addMessage(content, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = content;
+            
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'message-info';
+            infoDiv.innerHTML = `<span>${sender === 'user' ? 'You' : 'eGuru'} • Just now</span>`;
+            
+            messageDiv.appendChild(contentDiv);
+            messageDiv.appendChild(infoDiv);
+            
+            chatMessages.insertBefore(messageDiv, typingIndicator);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Generate a simple bot response (in a real app, this would call an API)
+        function getBotResponse(userMessage) {
+            const responses = [
+                "I understand you're asking about: " + userMessage + ". Can you provide more details?",
+                "That's an interesting question. Here's what I can tell you...",
+                "I can help with that. Let me explain...",
+                "Thanks for your question. The answer is...",
+                "I'm designed to assist with educational topics. For your query about '" + userMessage + "', I recommend checking our knowledge base."
+            ];
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Add click handlers for suggestion buttons
+        document.querySelectorAll('.suggestion-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                messageInput.value = button.textContent;
+                messageInput.focus();
+            });
+        });
+
 
     </script>
 </body>

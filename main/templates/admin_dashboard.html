@@ -9,12 +9,22 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+      :root {
+        --primary-color: #6e48aa;
+        --secondary-color: #9d50bb;
+        --bg-color: #f5f7fa;
+        --chat-bg: #ffffff;
+        --user-msg: #f0f4ff;
+        --bot-msg: #ffffff;
+        --text-color: #333333;
+        --border-color: #e0e0e0;
+        }
         body { background-color: #f8f8f8; font-family: Roboto, sans-serif; }
         .layout { display: flex; height: 100vh; }
         .sidebar { background-color: #f8f9fa; color: black; width: 250px; overflow-y: auto; position: sticky; top:0; border-right: 1px solid #e9ecef; }
         .sidebar img { width: 100%; margin-bottom: 20px; }
         .sidebar a { color: black; padding: 15px; display: block; }
-        .sidebar a:hover, a.active { background-color: rgb(218, 236, 255); text-decoration: none; }
+        .sidebar a.active { background-color: rgb(218, 236, 255); text-decoration: none; }
         .main-content { flex-grow: 1; padding: 30px; overflow-y: auto; }
         .content-section { display: none; }
         #analytics { display: block; }
@@ -44,6 +54,179 @@
         .training-card .card-img-top { height: 140px; object-fit: cover; }
         .training-card .card-body { padding: 12px; }
         .training-card .card-text { font-size: 0.9rem; height: 60px; overflow: hidden; }
+        .chat-container {
+          display: flex;
+          flex-direction: column;
+          max-width: 900px;
+          height: 90vh;
+          margin: 20px auto;
+          border-radius: 12px;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+          overflow: hidden;
+          background-color: var(--chat-bg);
+      }
+
+      .chat-header {
+          background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+          color: white;
+          padding: 15px 20px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+      }
+
+      .chat-header h2 {
+          margin: 0;
+          font-weight: 600;
+      }
+
+      .chat-messages {
+          margin-right: 20px;
+          flex: 1;
+          padding: 20px;
+          overflow-y: auto;
+          background-color: var(--chat-bg);
+      }
+
+      .message {
+          margin-bottom: 20px;
+          display: flex;
+          flex-direction: column;
+          max-width: 80%;
+      }
+
+      .user-message {
+          align-self: flex-end;
+          background-color: var(--user-msg);
+          border-radius: 18px 18px 0 18px;
+      }
+
+      .bot-message {
+          align-self: flex-start;
+          background-color: var(--bot-msg);
+          border: 1px solid var(--border-color);
+          border-radius: 18px 18px 18px 0;
+      }
+
+      .message-content {
+          padding: 12px 16px;
+      }
+
+      .message-info {
+          font-size: 0.8rem;
+          color: #777;
+          margin-top: 4px;
+          display: flex;
+          align-items: center;
+      }
+
+      .input-area {
+          display: flex;
+          padding: 15px;
+          border-top: 1px solid var(--border-color);
+          background-color: var(--chat-bg);
+      }
+
+      #messageInput {
+          flex: 1;
+          padding: 12px 15px;
+          border: 1px solid var(--border-color);
+          border-radius: 24px;
+          outline: none;
+          font-size: 1rem;
+          transition: border 0.3s;
+      }
+
+      #messageInput:focus {
+          border-color: var(--primary-color);
+      }
+
+      #sendButton {
+          background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+          color: white;
+          border: none;
+          border-radius: 24px;
+          padding: 0 20px;
+          margin-left: 10px;
+          cursor: pointer;
+          font-size: 1rem;
+          transition: transform 0.2s, opacity 0.2s;
+      }
+
+      #sendButton:hover {
+          opacity: 0.9;
+          transform: scale(1.02);
+      }
+
+      #sendButton:active {
+          transform: scale(0.98);
+      }
+
+      .typing-indicator {
+          display: none;
+          padding: 10px 15px;
+          background-color: var(--bot-msg);
+          border-radius: 18px 18px 18px 0;
+          align-self: flex-start;
+          margin-bottom: 10px;
+          border: 1px solid var(--border-color);
+      }
+
+      .typing-dots {
+          display: flex;
+          padding: 10px 0;
+      }
+
+      .typing-dot {
+          width: 8px;
+          height: 8px;
+          background-color: #999;
+          border-radius: 50%;
+          margin: 0 2px;
+          animation: typingAnimation 1.4s infinite ease-in-out;
+      }
+
+      .typing-dot:nth-child(1) { animation-delay: 0s; }
+      .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+      .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+      @keyframes typingAnimation {
+          0%, 60%, 100% { transform: translateY(0); }
+          30% { transform: translateY(-5px); }
+      }
+
+      .logo2 {
+          width: 50px;
+          height: 40px;
+          margin-right: 10px;
+      }
+
+      .header-left {
+          display: flex;
+          align-items: center;
+      }
+
+      .suggestions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+          padding: 10px 20px;
+          border-top: 1px solid var(--border-color);
+      }
+
+      .suggestion-btn {
+          background-color: var(--user-msg);
+          border: none;
+          border-radius: 16px;
+          padding: 8px 15px;
+          font-size: 0.9rem;
+          cursor: pointer;
+          transition: background-color 0.2s;
+      }
+
+      .suggestion-btn:hover {
+        background-color: #e0e8ff;
+      }
     </style>
 </head>
 <body>
@@ -52,12 +235,13 @@
         <div class="sidebar p-3">
             <img src="/static/eguru.webp" alt="eGuru Logo" class="logo" />
             <ul class="nav flex-column">
+                {% comment %} <li class="nav-item"><a href="#dashboard" class="nav-link"><i class="fa fa-layer-group"></i> Dashboard</a></li> {% endcomment %}
                 <li class="nav-item"><a href="#analytics" class="nav-link"><i class="fa fa-chart-area"></i> Analytics</a></li>
                 <li class="nav-item"><a href="#all-trainings" class="nav-link"><i class="fa fa-book-reader"></i> All Trainings</a></li>
                 <li class="nav-item"><a href="#manage-trainings" class="nav-link">⚙️ Manage Trainings</a></li>
                 <li class="nav-item"><a href="#manage-users" class="nav-link"><i class="fa fa-users-cog"></i> Manage Users</a></li>
                 <li class="nav-item"><a href="#manage-llm" class="nav-link"><i class="fa fa-robot"></i> Manage eGuru LLM</a></li>
-                <li class="nav-item"><button class="btn btn-dark w-100 mt-3" onclick="toggleChat()">💬 Chat with eGuru</button></li>
+                <li class="nav-item"><a href="#eguru-chatbot" class="nav-link"><button class="btn btn-dark w-100 mt-3" >💬 Chat with eGuru</button></a></li>
             </ul>
         </div>
 
@@ -74,6 +258,20 @@
                     </div>  
                 </div>
             </nav>
+
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="content-section">
+                <h4>Dashboard</h4>
+                <div class="row">
+                    <div class="col-md-4"><div class="card text-center"><div class="card-body"><h5 class="card-title">Total Trainings</h5><p class="card-text">{{ total_trainings }}</p></div></div></div>
+                    <div class="col-md-4"><div class="card text-center"><div class="card-body"><h5 class="card-title">Active Users</h5><p class="card-text">{{ active_users }}</p></div></div></div>
+                    <div class="col-md-4"><div class="card text-center"><div class="card-body"><h5 class="card-title">Completed Trainings</h5><p class="card-text">{{ completed_trainings }}</p></div></div></div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-md-6"><div class="card text-center"><div class="card-body"><h5 class="card-title">Upcoming Trainings</h5><p class="card-text">{{ upcoming_trainings }}</p></div></div></div>
+                    <div class="col-md-6"><div class="card text-center"><div class="card-body"><h5 class="card-title">Total Users</h5><p class="card-text">{{ total_users }}</p></div></div></div>
+                </div>
+            </div>
             <!-- Analytics sections -->
             <div id="analytics" class="content-section">
                 <h4>Analytics Section</h4>
@@ -123,7 +321,7 @@
                       <p class="small text-muted">Instructor: {{ training.instructor_name }}</p>
                       <div class="d-flex justify-content-between align-items-center">
                         <small class="text-muted">{{ training.duration }}</small>
-                        <small class="text-muted">Start: {{ training.start_date|date:"Y-m-d" }}</small>
+                        <small class="text-muted">Start: {{ training.start_date|date:"d-m-Y" }}</br>End: {{ training.end_date|date:"d-m-Y" }}</small>
                       </div>
                     </div>
                     <div class="card-footer bg-transparent">
@@ -299,8 +497,108 @@
               </div>
             </div>
             
-            <!-- Manage eGuru LLM Content -->
-            <div id="manage-llm" class="content-section">Manage eGuru LLM Content</div>
+            <!-- Manage eGuru LLM -->
+            <div id="manage-llm" class="content-section" style="display: none; justify-content: center; align-items: center; height: 100vh;">
+              <div class="card p-4 shadow-lg" style="width: 500px;">
+                <h4 class="mb-4 text-center">Upload LLM Documents</h4>
+                <form id="llmForm" action="{% url 'manage_llm' %}" method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+
+                  <div class="mb-3">
+                    <label for="document_name" class="form-label">Document Name</label>
+                    <input type="text" class="form-control" id="document_name" name="document_name" required>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="document" class="form-label">Upload File (PDF, PPT, DOCX)</label>
+                    <input type="file" class="form-control" id="document" name="document" accept=".pdf,.ppt,.pptx,.doc,.docx" required>
+                  </div>
+
+                  <button type="submit" class="btn btn-success w-100">Upload Document</button>
+                </form>              
+                <button class="btn btn-info add-user-btn"><a href="#uploaded-llm-docs" class="nav-link"> View Uploaded Docments</a>
+              </div>
+            </div>
+
+            <!-- Display Uploaded Documents -->
+            <div id="uploaded-llm-docs" class="content-section" style="display: none;">
+              <h4>Uploaded LLM Documents</h4>
+
+              <div class="d-flex justify-content-end align-items-center mb-3">
+                <input type="text" class="form-control me-2" placeholder="Search documents..." id="llmSearchInput" onkeyup="filterLLMDocs()"><button class="btn btn-success add-user-btn"><a href="#manage-llm" class="nav-link"> Uploaded New Docments</a>
+              </div>
+
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Document Name</th>
+                    <th>Type</th>
+                    <th>Upload Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="llmTableBody">
+                  {% for doc in uploaded_documents %}
+                  <tr class="llm-doc-row">
+                    <td>{{ doc.name }}</td>
+                    <td>{{ doc.type }}</td>
+                    <td>{{ doc.upload_date|date:"Y-m-d" }}</td>
+                    <td>
+                      <a href="{{ doc.file_url }}" download="{{ doc.name }}.pdf" class="btn btn-sm btn-outline-success">Download</a>
+                    </td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="4" class="text-center">No documents uploaded yet.</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            
+            <!-- Eguru Chatbot Section -->
+            <div id="eguru-chatbot" class="content-section" style="display: none;">
+              <div class="chat-container">
+                <div class="chat-header">
+                    <div class="header-left">
+                        <img src="/static/icon.webp" alt="eGuru Logo" class="logo2">
+                        <h2>eGuru Assistant</h2>
+                    </div>
+                    <div>v1.0</div>
+                </div>
+        
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message bot-message">
+                        <div class="message-content">
+                            Hello! I'm eGuru, your AI assistant. How can I help you today?
+                        </div>
+                        <div class="message-info">
+                            <span>eGuru • Just now</span>
+                        </div>
+                    </div>
+        
+                    <div class="typing-indicator" id="typingIndicator">
+                        <div class="typing-dots">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="suggestions">
+                    <button class="suggestion-btn">What is eGuru?</button>
+                    <button class="suggestion-btn">How to use this platform?</button>
+                    <button class="suggestion-btn">Troubleshooting help</button>
+                    <button class="suggestion-btn">Latest features</button>
+                </div>
+        
+                <div class="input-area">
+                    <input type="text" id="messageInput" placeholder="Message eGuru..." autocomplete="off">
+                    <button id="sendButton">Send</button>
+                </div>
+            </div>
+
         </div>
 
         <!-- Chat with Assistant -->
@@ -449,6 +747,112 @@
             card.style.display = matchesSearch && matchesCategory && matchesStatus ? 'block' : 'none';
           });
         }
+
+        // Filter LLM Documents
+        function filterLLMDocs() {
+          let searchInput = document.getElementById("llmSearchInput").value.toLowerCase();
+          let rows = document.querySelectorAll(".llm-doc-row");
+
+          rows.forEach(row => {
+              let docName = row.cells[0].textContent.toLowerCase();
+              row.style.display = docName.includes(searchInput) ? "" : "none";
+          });
+        }
+
+        // Upload LLM Document
+        function uploadLLMDocument() {
+          let fileInput = document.getElementById("llmUpload");
+          if (fileInput.files.length === 0) {
+              alert("Please select a document to upload.");
+              return;
+          }
+
+          let fileName = fileInput.files[0].name;
+          let allowedExtensions = [".pdf", ".ppt", ".pptx", ".doc", ".docx"];
+          let fileExt = fileName.slice(fileName.lastIndexOf(".")).toLowerCase();
+
+          if (!allowedExtensions.includes(fileExt)) {
+              alert("Invalid file type! Only PDF, PPT, and DOCX are allowed.");
+              return;
+          }
+
+          alert(`Document "${fileName}" uploaded successfully!`);
+        }
+
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        // Handle sending messages
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message === '') return;
+
+            // Add user message to chat
+            addMessage(message, 'user');
+            messageInput.value = '';
+            
+            // Show typing indicator
+            typingIndicator.style.display = 'block';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Simulate bot response after a delay
+            setTimeout(() => {
+                typingIndicator.style.display = 'none';
+                const botResponse = getBotResponse(message);
+                addMessage(botResponse, 'bot');
+            }, 1000 + Math.random() * 2000);
+        }
+
+        // Add a message to the chat
+        function addMessage(content, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = content;
+            
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'message-info';
+            infoDiv.innerHTML = `<span>${sender === 'user' ? 'You' : 'eGuru'} • Just now</span>`;
+            
+            messageDiv.appendChild(contentDiv);
+            messageDiv.appendChild(infoDiv);
+            
+            chatMessages.insertBefore(messageDiv, typingIndicator);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Generate a simple bot response (in a real app, this would call an API)
+        function getBotResponse(userMessage) {
+            const responses = [
+                "I understand you're asking about: " + userMessage + ". Can you provide more details?",
+                "That's an interesting question. Here's what I can tell you...",
+                "I can help with that. Let me explain...",
+                "Thanks for your question. The answer is...",
+                "I'm designed to assist with educational topics. For your query about '" + userMessage + "', I recommend checking our knowledge base."
+            ];
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Add click handlers for suggestion buttons
+        document.querySelectorAll('.suggestion-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                messageInput.value = button.textContent;
+                messageInput.focus();
+            });
+        });
+
 
     </script>
 </body>
