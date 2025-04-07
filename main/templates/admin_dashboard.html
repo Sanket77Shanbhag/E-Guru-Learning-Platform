@@ -2,648 +2,1566 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - eGuru</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-      :root {
-        --primary-color: #6e48aa;
-        --secondary-color: #9d50bb;
-        --bg-color: #f5f7fa;
-        --chat-bg: #ffffff;
-        --user-msg: #f0f4ff;
-        --bot-msg: #ffffff;
-        --text-color: #333333;
-        --border-color: #e0e0e0;
+        :root {
+            --primary: #6e48aa;
+            --secondary: #9d50bb;
+            --accent: #ff6584;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --success: #28a745;
+            --card-bg: #ffffff;
+            --sidebar-bg: #f0f2f5;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --bg-color: #f5f7fa;
+            --chat-bg: #ffffff;
+            --user-msg: #f0f4ff;
+            --bot-msg: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
         }
-        body { background-color: #f8f8f8; font-family: Roboto, sans-serif; }
-        .layout { display: flex; height: 100vh; }
-        .sidebar { background-color: #f8f9fa; color: black; width: 250px; overflow-y: auto; position: sticky; top:0; border-right: 1px solid #e9ecef; }
-        .sidebar img { width: 100%; margin-bottom: 20px; }
-        .sidebar a { color: black; padding: 15px; display: block; }
-        .sidebar a.active { background-color: rgb(218, 236, 255); text-decoration: none; }
-        .main-content { flex-grow: 1; padding: 30px; overflow-y: auto; }
-        .content-section { display: none; }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--text-dark);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            padding: 2rem 1.5rem;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .logo {
+            width: 180px;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            color: var(--text-dark);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: linear-gradient(90deg, rgba(110,72,170,0.1) 0%, rgba(157,80,187,0.1) 100%);
+            color: var(--primary);
+        }
+
+        .nav-link i {
+            margin-right: 12px;
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .chat-btn {
+            margin-top: 2rem;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            width: 100%;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .chat-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(110,72,170,0.3);
+        }
+
+        .chat-btn i {
+            margin-right: 8px;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
         #analytics { display: block; }
-        .navbar { background-color: #f8f9fa; color: black; }
-        .logo { width: 180px; margin-bottom: 20px; }
-        #profile { display: none; position: fixed; top: 100px; right: 40px; width: 300px; height: 400px; background-color: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); overflow: hidden; z-index: 9999;}
-        #chatBox1 { display: none; position: fixed; bottom: 30px; right: 130px; width: 300px; height: 400px; background-color: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); overflow: hidden; }
-        #chatMessages { height: 340px; overflow-x: auto; padding: 10px; }
-        #chatInput { display: flex; }
-        #chatInput input { flex-grow: 1; padding: 10px; border: none; border-top: 1px solid #ccc; }
-        #chatInput button { background-color: black; color: white; border: none; padding: 10px 15px; }
-        #robot-circle {width: 80px; height: 80px; background-color: #f0f0f0; border-radius: 50%; justify-content: center; display: flex; align-items: center; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); overflow: hidden; position: fixed; bottom: 30px; right: 30px; }
-        #robot-circle img {width: 50px; height: 50px;}
-        .filter-container { display: flex; justify-content: space-between; margin-bottom: 20px; }
-        .user-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .user-table th, .user-table td { border: 1px solid #ccc; padding: 10px; text-align: center; }
-        .user-table th { background-color: #f0f0f0; }
-        .filter-container select, .filter-container button { padding: 8px; margin-right: 10px; }
-        .action-menu { position: relative; display: inline-block; }
-        .action-menu .menu-content { display: none; position: absolute; background-color: #fff; min-width: 120px; box-shadow: 0px 8px 16px rgba(0,0,0,0.2); z-index: 1; }
-        .action-menu .menu-content a { color: black; padding: 10px 16px; text-decoration: none; display: block; }
-        .action-menu .menu-content a:hover { background-color: #f0f0f0; }
-        .action-menu:hover .menu-content { display: block; }
-        .add-user-btn { display: block }
-        .training-card .card { transition: transform 0.3s; }
-        .training-card .card:hover { transform: translateY(-5px); }
-        .training-card .card-img-top { height: 140px; object-fit: cover; }
-        .training-card .card-body { padding: 12px; }
-        .training-card .card-text { font-size: 0.9rem; height: 60px; overflow: hidden; }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 12px;
+        }
+
+        .user-name {
+            font-weight: 600;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 1rem;
+            width: 250px;
+            display: none;
+            z-index: 10;
+        }
+
+        .profile-dropdown.active {
+            display: block;
+        }
+
+        .profile-info p {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .profile-info p strong {
+            color: var(--primary);
+        }
+
+        .logout-btn {
+            display: block;
+            width: 100%;
+            padding: 0.5rem;
+            background: var(--light);
+            border: none;
+            border-radius: 6px;
+            margin-top: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(110,72,170,0.1);
+        }
+
+        /* Dashboard Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(110,72,170,0.1);
+        }
+
+        .stat-title {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-change {
+            font-size: 0.8rem;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+        }
+
+        .stat-change.down {
+            color: var(--accent);
+        }
+
+        /* Training Cards */
+        .training-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .training-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .training-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(110,72,170,0.1);
+        }
+
+        .training-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-active {
+            background: rgba(40,167,69,0.1);
+            color: var(--success);
+        }
+
+        .badge-upcoming {
+            background: rgba(255,193,7,0.1);
+            color: #ffc107;
+        }
+
+        .badge-completed {
+            background: rgba(108,117,125,0.1);
+            color: #6c757d;
+        }
+
+        .training-img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+        }
+
+        .training-body {
+            padding: 1.5rem;
+        }
+
+        .training-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .training-category {
+            display: inline-block;
+            background: rgba(110,72,170,0.1);
+            color: var(--primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .training-desc {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .training-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .training-instructor {
+            display: flex;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .training-instructor i {
+            margin-right: 0.5rem;
+            color: var(--primary);
+        }
+
+        .training-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-details {
+            flex: 1;
+            background: white;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-details:hover {
+            background: rgba(110,72,170,0.1);
+        }
+
+        .btn-enroll {
+            flex: 1;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-enroll:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        /* Filter Controls */
+        .filter-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+            margin-right: 1rem;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(110,72,170,0.1);
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .form-select {
+            padding: 0.75rem 1rem;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(110,72,170,0.1);
+        }
+
+        .btn-add {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-add:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(110,72,170,0.2);
+        }
+
+        /* Analytics Chart */
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chart-btn {
+            padding: 0.5rem 1rem;
+            background: var(--light);
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chart-btn.active {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .chart-btn:hover:not(.active) {
+            background: rgba(110,72,170,0.1);
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 250px;
+                padding: 1.5rem 1rem;
+            }
+            .main-content {
+                margin-left: 250px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                z-index: 1000;
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            .menu-toggle {
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+            .search-box {
+                max-width: 100%;
+                margin-right: 0;
+            }
+            .filter-group {
+                flex-wrap: wrap;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .training-grid {
+                grid-template-columns: 1fr;
+            }
+        }
         .chat-container {
-          display: flex;
-          flex-direction: column;
-          max-width: 900px;
-          height: 90vh;
-          margin: 20px auto;
-          border-radius: 12px;
-          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-          overflow: hidden;
-          background-color: var(--chat-bg);
-      }
+            display: flex;
+            flex-direction: column;
+            max-width: 900px;
+            height: 90vh;
+            margin: 20px auto;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            background-color: var(--chat-bg);
+        }
 
-      .chat-header {
-          background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-          color: white;
-          padding: 15px 20px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-      }
+        .chat-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
 
-      .chat-header h2 {
-          margin: 0;
-          font-weight: 600;
-      }
+        .chat-header h2 {
+            margin: 0;
+            font-weight: 600;
+        }
 
-      .chat-messages {
-          margin-right: 20px;
-          flex: 1;
-          padding: 20px;
-          overflow-y: auto;
-          background-color: var(--chat-bg);
-      }
+        .chat-messages {
+            margin-right: 20px;
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: var(--chat-bg);
+        }
 
-      .message {
-          margin-bottom: 20px;
-          display: flex;
-          flex-direction: column;
-          max-width: 80%;
-      }
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            max-width: 80%;
+        }
 
-      .user-message {
-          align-self: flex-end;
-          background-color: var(--user-msg);
-          border-radius: 18px 18px 0 18px;
-      }
+        .user-message {
+            align-self: flex-end;
+            background-color: var(--user-msg);
+            border-radius: 18px 18px 0 18px;
+        }
 
-      .bot-message {
-          align-self: flex-start;
-          background-color: var(--bot-msg);
-          border: 1px solid var(--border-color);
-          border-radius: 18px 18px 18px 0;
-      }
+        .bot-message {
+            align-self: flex-start;
+            background-color: var(--bot-msg);
+            border: 1px solid var(--border-color);
+            border-radius: 18px 18px 18px 0;
+        }
 
-      .message-content {
-          padding: 12px 16px;
-      }
+        .message-content {
+            padding: 12px 16px;
+        }
 
-      .message-info {
-          font-size: 0.8rem;
-          color: #777;
-          margin-top: 4px;
-          display: flex;
-          align-items: center;
-      }
+        .message-info {
+            font-size: 0.8rem;
+            color: #777;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+        }
 
-      .input-area {
-          display: flex;
-          padding: 15px;
-          border-top: 1px solid var(--border-color);
-          background-color: var(--chat-bg);
-      }
+        .input-area {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--chat-bg);
+        }
 
-      #messageInput {
-          flex: 1;
-          padding: 12px 15px;
-          border: 1px solid var(--border-color);
-          border-radius: 24px;
-          outline: none;
-          font-size: 1rem;
-          transition: border 0.3s;
-      }
+        #messageInput {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            outline: none;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
 
-      #messageInput:focus {
-          border-color: var(--primary-color);
-      }
+        #messageInput:focus {
+            border-color: var(--primary);
+        }
 
-      #sendButton {
-          background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-          color: white;
-          border: none;
-          border-radius: 24px;
-          padding: 0 20px;
-          margin-left: 10px;
-          cursor: pointer;
-          font-size: 1rem;
-          transition: transform 0.2s, opacity 0.2s;
-      }
+        #sendButton {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 24px;
+            padding: 0 20px;
+            margin-left: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.2s, opacity 0.2s;
+        }
 
-      #sendButton:hover {
-          opacity: 0.9;
-          transform: scale(1.02);
-      }
+        #sendButton:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
 
-      #sendButton:active {
-          transform: scale(0.98);
-      }
+        #sendButton:active {
+            transform: scale(0.98);
+        }
 
-      .typing-indicator {
-          display: none;
-          padding: 10px 15px;
-          background-color: var(--bot-msg);
-          border-radius: 18px 18px 18px 0;
-          align-self: flex-start;
-          margin-bottom: 10px;
-          border: 1px solid var(--border-color);
-      }
+        .typing-indicator {
+            display: none;
+            padding: 10px 15px;
+            background-color: var(--bot-msg);
+            border-radius: 18px 18px 18px 0;
+            align-self: flex-start;
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+        }
 
-      .typing-dots {
-          display: flex;
-          padding: 10px 0;
-      }
+        .typing-dots {
+            display: flex;
+            padding: 10px 0;
+        }
 
-      .typing-dot {
-          width: 8px;
-          height: 8px;
-          background-color: #999;
-          border-radius: 50%;
-          margin: 0 2px;
-          animation: typingAnimation 1.4s infinite ease-in-out;
-      }
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #999;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: typingAnimation 1.4s infinite ease-in-out;
+        }
 
-      .typing-dot:nth-child(1) { animation-delay: 0s; }
-      .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-      .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 
-      @keyframes typingAnimation {
-          0%, 60%, 100% { transform: translateY(0); }
-          30% { transform: translateY(-5px); }
-      }
+        @keyframes typingAnimation {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
 
-      .logo2 {
-          width: 50px;
-          height: 40px;
-          margin-right: 10px;
-      }
+        .logo2 {
+            width: 50px;
+            height: 40px;
+            margin-right: 10px;
+        }
 
-      .header-left {
-          display: flex;
-          align-items: center;
-      }
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
 
-      .suggestions {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          padding: 10px 20px;
-          border-top: 1px solid var(--border-color);
-      }
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px 20px;
+            border-top: 1px solid var(--border-color);
+        }
 
-      .suggestion-btn {
-          background-color: var(--user-msg);
-          border: none;
-          border-radius: 16px;
-          padding: 8px 15px;
-          font-size: 0.9rem;
-          cursor: pointer;
-          transition: background-color 0.2s;
-      }
+        .suggestion-btn {
+            background-color: var(--user-msg);
+            border: none;
+            border-radius: 16px;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
 
-      .suggestion-btn:hover {
-        background-color: #e0e8ff;
-      }
+        .suggestion-btn:hover {
+            background-color: #e0e8ff;
+        }
+        /* Form Styles */
+        .form-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            padding: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(110,72,170,0.15);
+        }
+
+        .form-title {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .form-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-bottom: 1.25rem;
+            background-color: var(--card-bg);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(110,72,170,0.1);
+        }
+
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236e48aa' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 16px 12px;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(110,72,170,0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: rgba(110,72,170,0.1);
+        }
+
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 1.5rem 0;
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .data-table th {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tr:hover td {
+            background-color: rgba(110,72,170,0.05);
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        /* Filter Controls */
+        .filter-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+            margin-right: 1rem;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(110,72,170,0.1);
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .filter-select {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: var(--card-bg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(110,72,170,0.1);
+        }
+
+        /* Section Transitions */
+        .content-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+            .search-box {
+                max-width: 100%;
+                margin-right: 0;
+            }
+            .filter-group {
+                flex-wrap: wrap;
+            }
+            .form-container {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="layout">
-        <!-- Sidebar -->
-        <div class="sidebar p-3">
-            <img src="/static/eguru.webp" alt="eGuru Logo" class="logo" />
-            <ul class="nav flex-column">
-                {% comment %} <li class="nav-item"><a href="#dashboard" class="nav-link"><i class="fa fa-layer-group"></i> Dashboard</a></li> {% endcomment %}
-                <li class="nav-item"><a href="#analytics" class="nav-link"><i class="fa fa-chart-area"></i> Analytics</a></li>
-                <li class="nav-item"><a href="#all-trainings" class="nav-link"><i class="fa fa-book-reader"></i> All Trainings</a></li>
-                <li class="nav-item"><a href="#manage-trainings" class="nav-link">⚙️ Manage Trainings</a></li>
-                <li class="nav-item"><a href="#manage-users" class="nav-link"><i class="fa fa-users-cog"></i> Manage Users</a></li>
-                <li class="nav-item"><a href="#manage-llm" class="nav-link"><i class="fa fa-robot"></i> Manage eGuru LLM</a></li>
-                <li class="nav-item"><a href="#eguru-chatbot" class="nav-link"><button class="btn btn-dark w-100 mt-3" >💬 Chat with eGuru</button></a></li>
-            </ul>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <img src="/static/eguru.webp" alt="eGuru Logo" class="logo">
+        </div>
+        
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="#analytics" class="nav-link active">
+                    <i class="fas fa-chart-area"></i>
+                    <span>Analytics</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#all-trainings" class="nav-link">
+                    <i class="fas fa-book-reader"></i>
+                    <span>All Trainings</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#manage-trainings" class="nav-link">
+                    <i class="fas fa-cogs"></i>
+                    <span>Manage Trainings</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#manage-users" class="nav-link">
+                    <i class="fas fa-users-cog"></i>
+                    <span>Manage Users</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#manage-llm" class="nav-link">
+                    <i class="fas fa-robot"></i>
+                    <span>Manage LLM</span>
+                </a>
+            </li>
+        </ul>
+        
+        <button class="chat-btn">
+          <a href="#eguru-chatbot" class="nav-link">
+            <i class="fas fa-comment-dots"></i>
+            <span>Chat with eGuru</span>
+        </button>
+        </a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <h1 class="page-title">Admin Dashboard</h1>
+            
+            <div class="user-profile" id="profileToggle">
+                <div class="user-avatar">{{ admin.name|slice:":1"|upper }}</div>
+                <div>
+                    <div class="user-name">{{ admin.name }}</div>
+                    <div class="user-role">Admin</div>
+                </div>
+                <i class="fas fa-chevron-down ml-2" style="font-size: 0.8rem;"></i>
+                
+                <div class="profile-dropdown" id="profileDropdown">
+                    <div class="profile-info">
+                        <p><strong>PB Number:</strong> {{ admin.pb_number }}</p>
+                        <p><strong>Name:</strong> {{ admin.name }}</p>
+                        <p><strong>Gender:</strong> {{ admin.gender }}</p>
+                        <p><strong>Role:</strong> {{ admin.role }}</p>
+                        <p><strong>Division:</strong> {{ admin.division|default:"N/A" }}</p>
+                        <p><strong>Department:</strong> {{ admin.department|default:"N/A" }}</p>
+                        <p><strong>Designation:</strong> {{ admin.designation|default:"N/A" }}</p>
+                    </div>
+                    <a href="{% url 'signout' %}" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Navbar -->
-            <nav class="navbar navbar-expand-lg navbar-dark">
-                <div class="container-fluid">
-                    <a class="navbar-brand" href="#"></a>
-                    <div class="d-flex">
-                        <!-- Changed the logout link to point to signout URL -->
-                        <a href="{% url 'signout' %}" class="btn btn-light"><i class="fa fa-sign-out-alt"></i> Admin</a>
-                        <button class="btn btn-light" onclick = "toggleChat()"><i class="fa fa-user"></i> {{admin.name}}</button>
-                    </div>  
+        <!-- Analytics Section -->
+        <div id="analytics" class="content-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title">Total Trainings</div>
+                    <div class="stat-value">{{ total_trainings }}</div>
+                    <div class="stat-change">
+                        <i class="fas fa-arrow-up"></i> 12% from last month
+                    </div>
                 </div>
-            </nav>
+                <div class="stat-card">
+                    <div class="stat-title">Active Users</div>
+                    <div class="stat-value">{{ active_users }}</div>
+                    <div class="stat-change">
+                        <i class="fas fa-arrow-up"></i> 8% from last month
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Completed Trainings</div>
+                    <div class="stat-value">{{ completed_trainings }}</div>
+                    <div class="stat-change down">
+                        <i class="fas fa-arrow-down"></i> 3% from last month
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Upcoming Trainings</div>
+                    <div class="stat-value">{{ upcoming_trainings }}</div>
+                    <div class="stat-change">
+                        <i class="fas fa-arrow-up"></i> 15% from last month
+                    </div>
+                </div>
+            </div>
 
-            <!-- Dashboard Section -->
-            <div id="dashboard" class="content-section">
-                <h4>Dashboard</h4>
-                <div class="row">
-                    <div class="col-md-4"><div class="card text-center"><div class="card-body"><h5 class="card-title">Total Trainings</h5><p class="card-text">{{ total_trainings }}</p></div></div></div>
-                    <div class="col-md-4"><div class="card text-center"><div class="card-body"><h5 class="card-title">Active Users</h5><p class="card-text">{{ active_users }}</p></div></div></div>
-                    <div class="col-md-4"><div class="card text-center"><div class="card-body"><h5 class="card-title">Completed Trainings</h5><p class="card-text">{{ completed_trainings }}</p></div></div></div>
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">Training Analytics</h3>
+                    <div class="chart-controls">
+                        <button class="chart-btn active">Monthly</button>
+                        <button class="chart-btn">Quarterly</button>
+                        <button class="chart-btn">Yearly</button>
+                    </div>
                 </div>
-                <div class="row mt-4">
-                    <div class="col-md-6"><div class="card text-center"><div class="card-body"><h5 class="card-title">Upcoming Trainings</h5><p class="card-text">{{ upcoming_trainings }}</p></div></div></div>
-                    <div class="col-md-6"><div class="card text-center"><div class="card-body"><h5 class="card-title">Total Users</h5><p class="card-text">{{ total_users }}</p></div></div></div>
+                <canvas id="analyticsChart" height="300"></canvas>
+            </div>
+        </div>
+
+        <!-- All Trainings Section -->
+        <div id="all-trainings" class="content-section" style="display: none;">
+            <div class="filter-bar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="search-input form-control" placeholder="Search trainings..." id="trainingSearchInput" onkeyup="filterTrainings()">
+                </div>
+                
+                <div class="filter-group">
+                    <select class="form-select" id="trainingCategoryFilter" onchange="filterTrainings()">
+                        <option value="all">All Categories</option>
+                        <option value="aerodynamics">Aerodynamics</option>
+                        <option value="aviation">Aviation</option>
+                        <option value="personality-development">Personality Development</option>
+                        <option value="soft-skills">Soft Skills</option>
+                        <option value="corporate">Corporate</option>
+                        <option value="industry">Industry Knowledge</option>
+                    </select>
+                    
+                    <select class="form-select" id="statusFilter" onchange="filterTrainings()">
+                        <option value="all">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="upcoming">Upcoming</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                    
+                    <button class="btn-add" onclick="showSection('manage-trainings')">
+                        <i class="fas fa-plus"></i> Add Training
+                    </button>
                 </div>
             </div>
-            <!-- Analytics sections -->
-            <div id="analytics" class="content-section">
-                <h4>Analytics Section</h4>
-                <div>
-                    <label><input type="checkbox" id="categoryCheckbox"> Category</label>
-                    <label><input type="checkbox" id="trainingStatCheckbox"> Training Stat</label>
-                </div>
-                <canvas id="analyticsChart"></canvas>
-            </div>
             
-            <!-- All Trainings -->
-            <div id="all-trainings" class="content-section">
-              <h4>All Trainings</h4>              
-              <div class="d-flex justify-content-end align-items-center mb-3">
-                <input type="text" class="form-control me-2" placeholder="Search trainings..." id="trainingSearchInput" onkeyup="filterTrainings()">
-                <select class="form-select me-2" id="trainingCategoryFilter" onchange="filterTrainings()">
-                  <option value="all">All Categories</option>
-                  <option value="aerodynamics">Aerodynamics</option>
-                  <option value="aviation">Aviation</option>
-                  <option value="personality-development">Personality Development</option>
-                  <option value="soft-skills">Soft Skills</option>
-                  <option value="corporate">Corporate</option>
-                  <option value="industry">Industry Knowledge</option>
-                </select>
-                <select class="form-select" id="statusFilter" onchange="filterTrainings()">
-                  <option value="all">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="upcoming">Upcoming</option>
-                  <option value="completed">Completed</option>
-                </select>
-              </div>
-            
-              <div class="row row-cols-1 row-cols-md-3 g-3" id="trainingsContainer">
+            <div class="training-grid" id="trainingsContainer">
                 {% for training in all_trainings %}
-                <div class="col training-card" data-category="{{ training.category }}" data-status="{{ training.status }}">
-                  <div class="card h-100 shadow-sm">
-                    <div class="position-relative">
-                      <img src="{% static training.image_url %}" class="card-img-top" alt="{{ training.title }}">
-                      <span class="position-absolute top-0 end-0 badge bg-{% if training.status == 'active' %}success{% elif training.status == 'upcoming' %}warning{% else %}secondary{% endif %} m-2">
+                <div class="training-card" data-category="{{ training.category }}" data-status="{{ training.status }}">
+                    <span class="training-badge {% if training.status == 'active' %}badge-active{% elif training.status == 'upcoming' %}badge-upcoming{% else %}badge-completed{% endif %}">
                         {{ training.status|title }}
-                      </span>
+                    </span>
+                    <img src="{% static training.image_url %}" class="training-img" alt="{{ training.title }}">
+                    
+                    <div class="training-body">
+                        <h3 class="training-title">{{ training.title }}</h3>
+                        <span class="training-category">{{ training.category|title }}</span>
+                        <p class="training-desc">{{ training.description }}</p>
+                        
+                        <div class="training-instructor">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                            <span>{{ training.instructor_name }}</span>
+                        </div>
+                        
+                        <div class="training-meta">
+                            <span>{{ training.duration }}</span>
+                            <span>{{ training.start_date|date:"d M Y" }} - {{ training.end_date|date:"d M Y" }}</span>
+                        </div>
+                        
+                        <div class="training-actions">
+                            <button class="btn-details">Details</button>
+                            <button class="btn-enroll">Enroll</button>
+                        </div>
                     </div>
-                    <div class="card-body">
-                      <h6 class="card-title">{{ training.title }}</h6>
-                      <span class="badge bg-primary">{{ training.category|title }}</span>
-                      <p class="card-text small">{{ training.description }}</p>
-                      <p class="small text-muted">Instructor: {{ training.instructor_name }}</p>
-                      <div class="d-flex justify-content-between align-items-center">
-                        <small class="text-muted">{{ training.duration }}</small>
-                        <small class="text-muted">Start: {{ training.start_date|date:"d-m-Y" }}</br>End: {{ training.end_date|date:"d-m-Y" }}</small>
-                      </div>
-                    </div>
-                    <div class="card-footer bg-transparent">
-                      <button class="btn btn-sm btn-outline-primary">Details</button>
-                      <button class="btn btn-sm btn-success">Enroll</button>
-                    </div>
-                  </div>
                 </div>
                 {% endfor %}
-              </div>
             </div>
+        </div>
 
-            <!-- Manage Trainings -->    
-            <div id="manage-trainings" class="content-section" style="display: none; justify-content: center; align-items: center; height: 100vh;">
-              <div class="card p-4 shadow-lg" style="width: 500px;">
-                <h4 class="mb-4 text-center">Add New Trainings</h4>
+        <!-- Manage Trainings Section -->
+        <div id="manage-trainings" class="content-section">
+            <div class="form-container">
+                <h2 class="form-title">Add New Training</h2>
                 <form id="trainingForm" action="{% url 'manage_trainings' %}" method="post" enctype="multipart/form-data">
-                  {% csrf_token %}
-                  
-                  <div class="mb-3">
-                    <label for="title" class="form-label">Training Title</label>
-                    <input type="text" class="form-control" id="title" name="title" required>
-                  </div>
-                  
-                  <div class="mb-3">
-                    <label for="description" class="form-label">Description</label>
-                    <textarea class="form-control" id="description" name="description" required></textarea>
-                  </div>
-                  
-                  <div class="mb-3">
-                    <label for="category" class="form-label">Category</label>
-                    <select class="form-select" id="category" name="category" required>
-                      <option value="aerodynamics">Aerodynamics</option>
-                      <option value="aviation">Aviation</option>
-                      <option value="personality-development">Personality Development</option>
-                      <option value="technical">Technical</option>
-                      <option value="corporate">Corporate</option>
-                      <option value="management">Management</option>
-                    </select>
-                  </div>
-                  
-                  <div class="mb-3">
-                    <label for="status" class="form-label">Status</label>
-                    <select class="form-select" id="status" name="status" required>
-                      <option value="active">Active</option>
-                      <option value="upcoming">Upcoming</option>
-                      <option value="completed">Completed</option>
-                    </select>
-                  </div>
-                  
-                  <div class="mb-3">
-                    <label for="instructor_pb_number" class="form-label">Instructor PB Number</label>
-                    <input type="text" class="form-control" id="instructor_pb_number" name="instructor_pb_number" required>
-                  </div>
-                  
-                  <div class="mb-3">
-                    <label for="instructor_name" class="form-label">Instructor Name</label>
-                    <input type="text" class="form-control" id="instructor_name" name="instructor_name" required>
-                  </div>
-                  
-                  <div class="mb-3">
-                    <label for="start_date" class="form-label">Start Date</label>
-                    <input type="date" class="form-control" id="start_date" name="start_date" required>
-                  </div>
-                  
-                  <div class="mb-3">
-                    <label for="end_date" class="form-label">End Date</label>
-                    <input type="date" class="form-control" id="end_date" name="end_date" required>
-                  </div>
-                  
-                  <div class="mb-3">
-                    <label for="image" class="form-label">Upload Image (Max 2MB, PNG/JPG/JPEG/WEBP)</label>
-                    <input type="file" class="form-control" id="image" name="image" accept="image/png, image/jpg, image/jpeg, image/webp" required>
-                  </div>
-                  
-                  <button type="submit" class="btn btn-success w-100">Add Training</button>
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="title" class="form-label">Training Title</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                    </div>
+                    
+                    <div class="form-row" style="display: flex; gap: 1rem;">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-control form-select" id="category" name="category" required>
+                                <option value="" disabled selected>Select Category</option>
+                                <option value="aerodynamics">Aerodynamics</option>
+                                <option value="aviation">Aviation</option>
+                                <option value="personality-development">Personality Development</option>
+                                <option value="technical">Technical</option>
+                                <option value="corporate">Corporate</option>
+                                <option value="management">Management</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group" style="flex: 1;">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-control form-select" id="status" name="status" required>
+                                <option value="" disabled selected>Select Status</option>
+                                <option value="active">Active</option>
+                                <option value="upcoming">Upcoming</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row" style="display: flex; gap: 1rem;">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="instructor_pb_number" class="form-label">Instructor PB Number</label>
+                            <input type="text" class="form-control" id="instructor_pb_number" name="instructor_pb_number" required>
+                        </div>
+                        
+                        <div class="form-group" style="flex: 1;">
+                            <label for="instructor_name" class="form-label">Instructor Name</label>
+                            <input type="text" class="form-control" id="instructor_name" name="instructor_name" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row" style="display: flex; gap: 1rem;">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="start_date" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" required>
+                        </div>
+                        
+                        <div class="form-group" style="flex: 1;">
+                            <label for="end_date" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="image" class="form-label">Upload Image (Max 2MB, PNG/JPG/JPEG/WEBP)</label>
+                        <div class="file-upload">
+                            <input type="file" class="form-control" id="image" name="image" accept="image/png, image/jpg, image/jpeg, image/webp" required>
+                            <small class="file-hint">Click to browse or drag & drop files here</small>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">Add Training</button>
                 </form>
+            </div>
+        </div>
+
+        <!-- Manage Users Section -->
+        <div id="manage-users" class="content-section">
+            <div class="filter-bar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="search-input" placeholder="Search users..." id="userSearchInput">
+                </div>
+                
+                <div class="filter-group">
+                    <select class="filter-select" id="userFilter">
+                        <option value="all">All Users</option>
+                        <option value="admin">Admin</option>
+                        <option value="user">User</option>
+                    </select>
+                    
+                    <button class="btn btn-primary" onclick="showSection('create-user-section')">
+                        <i class="fas fa-user-plus"></i> Add User
+                    </button>
                 </div>
             </div>
             
-            <!-- Manage Users -->
-            <div id="manage-users" class="content-section">
-                <div class="filter-container">
-                  <div>
-                    <select id="userFilter">
-                      <option value="all">All Users</option>
-                      <option value="admin">Admin</option>
-                      <option value="user">User</option>
-                    </select>
-                    <button class="btn btn-success" onclick="filterUsers()">Filter</button>
-                  </div>
-                  <button class="btn btn-light add-user-btn"><a href="#create-user-section" class="nav-link">
-                    <i class="fa fa-user-plus"></i> Add User</a>
-                  </button>
-                </div>
-              
-                <table class="user-table">
-                  <thead>
-                    <tr>
-                      <th>PB Number</th>
-                      <th>Name</th>
-                      <th>Role</th>
-                      <th>Division</th>
-                      <th>Department</th>
-                      <th>Designation</th>
-                      {% comment %} <th>Action</th> {% endcomment %}
-                    </tr>
-                  </thead>
-                  <tbody id="userTableBody">
-                    {% for user in all_users %}
-                    <tr>
-                      <td>{{ user.pb_number|default:'N/A' }}</td>
-                      <td>{{ user.name|default:'N/A' }}</td>
-                      <td>{{ user.role|default:'N/A' }}</td>
-                      <td>{{ user.division|default:'N/A' }}</td>
-                      <td>{{ user.department|default:'N/A' }}</td>
-                      <td>{{ user.designation|default:'N/A' }}</td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>PB Number</th>
+                            <th>Name</th>
+                            <th>Role</th>
+                            <th>Division</th>
+                            <th>Department</th>
+                            <th>Designation</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        {% for user in all_users %}
+                        <tr>
+                            <td>{{ user.pb_number|default:'N/A' }}</td>
+                            <td>{{ user.name|default:'N/A' }}</td>
+                            <td>
+                                <span class="badge" style="background: {% if user.role == 'Admin' %}var(--primary){% else %}var(--success){% endif %}; color: white; padding: 0.25rem 0.5rem; border-radius: 20px; font-size: 0.75rem;">
+                                    {{ user.role|default:'N/A' }}
+                                </span>
+                            </td>
+                            <td>{{ user.division|default:'N/A' }}</td>
+                            <td>{{ user.department|default:'N/A' }}</td>
+                            <td>{{ user.designation|default:'N/A' }}</td>
+                            <td>
+                                <div class="table-actions">
+                                    <button class="action-btn" style="background: rgba(110,72,170,0.1); color: var(--primary);">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="action-btn" style="background: rgba(255,101,132,0.1); color: var(--accent);">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
                 </table>
             </div>
+        </div>
 
-            <!-- Create User Section -->
-            <div id="create-user-section" class="content-section justify-content-center align-items-center" style="height: 74vh;">
-              <div class="card p-4 shadow-lg" style="width: 500px;">
-                <h4 class="mb-4 text-center">Create User</h4>
+        <!-- Create User Section -->
+        <div id="create-user-section" class="content-section">
+            <div class="form-container">
+                <h2 class="form-title">Create New User</h2>
                 <form method="post" action="{% url 'create_user' %}">
-                  {% csrf_token %}
-                  <div class="mb-3">
-                    <label for="pb_number" class="form-label">PB Number</label>
-                    <input type="text" class="form-control" id="pb_number" name="pb_number" required />
-                  </div>
-                  <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" required />
-                  </div>
-                  <div class="mb-3">
-                    <label for="name" class="form-label">Name</label>
-                    <input type="text" class="form-control" id="name" name="name" required />
-                  </div>
-                  <div class="mb-3">
-                    <label for="gender" class="form-label">Gender</label>
-                    <select class="form-select" id="gender" name="gender" required>
-                      <option value="">Select Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                  <div class="mb-3">
-                    <label for="role" class="form-label">Role</label>
-                    <select class="form-select" id="role" name="role" required>
-                      <option value="">Select Role</option>
-                      <option value="Admin">Admin</option>
-                      <option value="User">User</option>
-                    </select>
-                  </div>
-                  <div class="mb-3">
-                    <label for="division" class="form-label">Division</label>
-                    <input type="text" class="form-control" id="division" name="division" />
-                  </div>
-                  <div class="mb-3">
-                    <label for="department" class="form-label">Department</label>
-                    <input type="text" class="form-control" id="department" name="department" />
-                  </div>
-                  <div class="mb-3">
-                    <label for="designation" class="form-label">Designation</label>
-                    <input type="text" class="form-control" id="designation" name="designation" />
-                  </div>
-                  <button type="submit" class="btn btn-success w-100">Create User</button>
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="pb_number" class="form-label">PB Number</label>
+                        <input type="text" class="form-control" id="pb_number" name="pb_number" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password</label>
+                        <div style="position: relative;">
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <i class="fas fa-eye toggle-password" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer;"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="name" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    
+                    <div class="form-row" style="display: flex; gap: 1rem;">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="gender" class="form-label">Gender</label>
+                            <select class="form-control form-select" id="gender" name="gender" required>
+                                <option value="" disabled selected>Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group" style="flex: 1;">
+                            <label for="role" class="form-label">Role</label>
+                            <select class="form-control form-select" id="role" name="role" required>
+                                <option value="" disabled selected>Select Role</option>
+                                <option value="Admin">Admin</option>
+                                <option value="User">User</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row" style="display: flex; gap: 1rem;">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="division" class="form-label">Division</label>
+                            <input type="text" class="form-control" id="division" name="division">
+                        </div>
+                        
+                        <div class="form-group" style="flex: 1;">
+                            <label for="department" class="form-label">Department</label>
+                            <input type="text" class="form-control" id="department" name="department">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="designation" class="form-label">Designation</label>
+                        <input type="text" class="form-control" id="designation" name="designation">
+                    </div>
+                    
+                    <div class="form-actions" style="display: flex; gap: 1rem;">
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">Create User</button>
+                        <button type="button" class="btn btn-outline" style="flex: 1;" onclick="showSection('manage-users')">Cancel</button>
+                    </div>
                 </form>
-              </div>
             </div>
-            
-            <!-- Manage eGuru LLM -->
-            <div id="manage-llm" class="content-section" style="display: none; justify-content: center; align-items: center; height: 100vh;">
-              <div class="card p-4 shadow-lg" style="width: 500px;">
-                <h4 class="mb-4 text-center">Upload LLM Documents</h4>
+        </div>
+
+        <!-- Manage LLM Section -->
+        <div id="manage-llm" class="content-section">
+            <div class="form-container">
+                <h2 class="form-title">Upload LLM Documents</h2>
                 <form id="llmForm" action="{% url 'manage_llm' %}" method="post" enctype="multipart/form-data">
-                  {% csrf_token %}
-
-                  <div class="mb-3">
-                    <label for="document_name" class="form-label">Document Name</label>
-                    <input type="text" class="form-control" id="document_name" name="document_name" required>
-                  </div>
-
-                  <div class="mb-3">
-                    <label for="document" class="form-label">Upload File (PDF, PPT, DOCX)</label>
-                    <input type="file" class="form-control" id="document" name="document" accept=".pdf,.ppt,.pptx,.doc,.docx" required>
-                  </div>
-
-                  <button type="submit" class="btn btn-success w-100">Upload Document</button>
-                </form>              
-                <button class="btn btn-info add-user-btn"><a href="#uploaded-llm-docs" class="nav-link"> View Uploaded Docments</a>
-              </div>
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="document_name" class="form-label">Document Name</label>
+                        <input type="text" class="form-control" id="document_name" name="document_name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="document" class="form-label">Upload File (PDF, PPT, DOCX)</label>
+                        <div class="file-upload">
+                            <input type="file" class="form-control" id="document" name="document" accept=".pdf,.ppt,.pptx,.doc,.docx" required>
+                            <small class="file-hint">Click to browse or drag & drop files here</small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions" style="display: flex; gap: 1rem;">
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">Upload Document</button>
+                        <button type="button" class="btn btn-outline" style="flex: 1;" onclick="showSection('uploaded-llm-docs')">View Documents</button>
+                    </div>
+                </form>
             </div>
+        </div>
 
-            <!-- Display Uploaded Documents -->
-            <div id="uploaded-llm-docs" class="content-section" style="display: none;">
-              <h4>Uploaded LLM Documents</h4>
-
-              <div class="d-flex justify-content-end align-items-center mb-3">
-                <input type="text" class="form-control me-2" placeholder="Search documents..." id="llmSearchInput" onkeyup="filterLLMDocs()"><button class="btn btn-success add-user-btn"><a href="#manage-llm" class="nav-link"> Uploaded New Docments</a>
-              </div>
-
-              <table class="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Document Name</th>
-                    <th>Type</th>
-                    <th>Upload Date</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="llmTableBody">
-                  {% for doc in uploaded_documents %}
-                  <tr class="llm-doc-row">
-                    <td>{{ doc.name }}</td>
-                    <td>{{ doc.type }}</td>
-                    <td>{{ doc.upload_date|date:"Y-m-d" }}</td>
-                    <td>
-                      <a href="{{ doc.file_url }}" download="{{ doc.name }}.pdf" class="btn btn-sm btn-outline-success">Download</a>
-                    </td>
-                  </tr>
-                  {% empty %}
-                  <tr>
-                    <td colspan="4" class="text-center">No documents uploaded yet.</td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
+        <!-- Uploaded LLM Documents Section -->
+        <div id="uploaded-llm-docs" class="content-section">
+            <div class="filter-bar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="search-input" placeholder="Search documents..." id="llmSearchInput">
+                </div>
+                
+                <button class="btn btn-primary" onclick="showSection('manage-llm')">
+                    <i class="fas fa-upload"></i> Upload New
+                </button>
             </div>
             
-            <!-- Eguru Chatbot Section -->
-            <div id="eguru-chatbot" class="content-section" style="display: none;">
-              <div class="chat-container">
-                <div class="chat-header">
-                    <div class="header-left">
-                        <img src="/static/icon.webp" alt="eGuru Logo" class="logo2">
-                        <h2>eGuru Chatbot</h2>
-                    </div>
-                    <div>
-                      <span>v1.0</span>
-                    </div>
-                </div>
-        
-                <div class="chat-messages" id="chatMessage">
-                    <div class="message bot-message">
-                        <div class="message-content">
-                            Hello! I'm eGuru, your AI assistant. Ask me academic related queries.
-                        </div>
-                        <div class="message-info">
-                            <span>eGuru • Just now</span>
-                        </div>
-                    </div>
-        
-                    <div class="typing-indicator" id="typingIndicator">
-                        <div class="typing-dots">
-                            <div class="typing-dot"></div>
-                            <div class="typing-dot"></div>
-                            <div class="typing-dot"></div>
-                        </div>
-                    </div>
-                </div>
-        
-                <div class="suggestions">
-                    <button class="suggestion-btn">What is eGuru?</button>
-                    <button class="suggestion-btn">How to use this platform?</button>
-                    <button class="suggestion-btn">Troubleshooting help</button>
-                    <button class="suggestion-btn">Latest features</button>
-                </div>
-        
-                <div class="input-area">
-                    <input type="text" id="messageInput" placeholder="Message eGuru..." autocomplete="on">
-                    <button id="sendButton">Send</button>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Chat with Assistant -->
-        <div id="robot-circle" onclick="toggleChat1()">
-            <img src="https://cdn-icons-png.flaticon.com/512/4712/4712043.png" alt="Robot Logo" />
-        </div>
-
-        <div id="chatBox1">
-            <div id="chatMessages"></div>
-            <div id="chatInput">
-                <input type="text" id="messageInputs" placeholder="Type a message..." />
-                <button onclick="sendMessages()">Send</button>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Document Name</th>
+                            <th>Type</th>
+                            <th>Upload Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="llmTableBody">
+                        {% for doc in uploaded_documents %}
+                        <tr>
+                            <td>{{ doc.name }}</td>
+                            <td>
+                                <span class="badge" style="background: rgba(110,72,170,0.1); color: var(--primary); padding: 0.25rem 0.5rem; border-radius: 20px; font-size: 0.75rem;">
+                                    {{ doc.type }}
+                                </span>
+                            </td>
+                            <td>{{ doc.upload_date|date:"Y-m-d" }}</td>
+                            <td>
+                                <div class="table-actions">
+                                    <a href="{{ doc.file_url }}'" download="{{ doc.name }}.pdf" class="action-btn" style="background: rgba(40,167,69,0.1); color: var(--success);">
+                                        <i class="fas fa-download"></i> Download
+                                    </a>
+                                    <button class="action-btn" style="background: rgba(255,101,132,0.1); color: var(--accent);">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-light);">
+                                No documents uploaded yet.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <!-- Admin Profile -->
-        <div id="profile">
-            <div class="p-3">
-                <h5><b>User Profile</b></h5></br>
-                <p>PB Number: {{ admin.pb_number }}</p>
-                <p>Name: {{ admin.name }}</p>
-                <p>Gender: {{ admin.gender }}</p>
-                <p>Role: {{ admin.role }}</p>
-                <p>Division: {{ admin.division|default:'N/A' }}</p>
-                <p>Department: {{ admin.department|default:'N/A' }}</p>
-                <p>Designation: {{ admin.designation|default:'N/A' }}</p>
-
-                {% comment %} <button class="btn btn-primary mt-3" onclick="togglePasswordForm()">Change Password</button>
-
-                <div id="passwordForm" style="display:none; margin-center: 20px;">
-                <label for="oldPassword">Old Password:</label>
-                <input type="password" id="oldPassword" class="form-control" required>
-
-                <label for="newPassword" class="mt-2">New Password:</label>
-                <input type="password" id="newPassword" class="form-control" required>
-
-                <button class="btn btn-success mt-3" onclick="updatePassword()">Update Password</button>
-                </div> {% endcomment %}
+        
+        
+        <!-- Chat Section -->
+        <!-- Eguru Chatbot Section -->
+        <div id="eguru-chatbot" class="content-section" style="display: none;">
+          <div class="chat-container">
+            <div class="chat-header">
+                <div class="header-left">
+                    <img src="/static/icon.webp" alt="eGuru Logo" class="logo2">
+                    <h2>eGuru Chatbot</h2>
+                </div>
+                <div>
+                    <span>v1.0</span>
+                </div>
             </div>
-        </div>
+    
+            <div class="chat-messages" id="chatMessage">
+                <div class="message bot-message">
+                    <div class="message-content">
+                        Hello! I'm eGuru, your AI assistant. Ask me academic related queries.
+                    </div>
+                    <div class="message-info">
+                        <span>eGuru • Just now</span>
+                    </div>
+                </div>
+    
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="suggestions">
+                <button class="suggestion-btn">What is eGuru?</button>
+                <button class="suggestion-btn">How to use this platform?</button>
+                <button class="suggestion-btn">Troubleshooting help</button>
+                <button class="suggestion-btn">Latest features</button>
+            </div>
+    
+            <div class="input-area">
+                <input type="text" id="messageInput" placeholder="Message eGuru..." autocomplete="off">
+                <button id="sendButton">Send</button>
+            </div>
+       </div>          
+   
     </div>
 
     <script>
+        // Toggle profile dropdown
+        document.getElementById('profileToggle').addEventListener('click', function() {
+            document.getElementById('profileDropdown').classList.toggle('active');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#profileToggle')) {
+                document.getElementById('profileDropdown').classList.remove('active');
+            }
+        });
+
         const links = document.querySelectorAll('.nav-link');
         const sections = document.querySelectorAll('.content-section');
 
@@ -733,22 +1651,22 @@
         document.getElementById('trainingSearchInput').addEventListener('input', filterTrainings);
       
         function filterTrainings() {
-          const searchInput = document.getElementById('trainingSearchInput').value.toLowerCase();
-          const categoryFilter = document.getElementById('trainingCategoryFilter').value;
-          const statusFilter = document.getElementById('statusFilter').value;
-          const cards = document.querySelectorAll('.training-card');
+            const searchInput = document.getElementById('trainingSearchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('trainingCategoryFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            const cards = document.querySelectorAll('.training-card');
         
-          cards.forEach(card => {
-            const title = card.querySelector('.card-title').textContent.toLowerCase();
-            const category = card.getAttribute('data-category');
-            const status = card.getAttribute('data-status');
-        
-            const matchesSearch = title.includes(searchInput);
-            const matchesCategory = categoryFilter === 'all' || category === categoryFilter;
-            const matchesStatus = statusFilter === 'all' || status === statusFilter;
-        
-            card.style.display = matchesSearch && matchesCategory && matchesStatus ? 'block' : 'none';
-          });
+            cards.forEach(card => {
+                const title = card.querySelector('.training-title').textContent.toLowerCase();
+                const category = card.getAttribute('data-category');
+                const status = card.getAttribute('data-status');
+            
+                const matchesSearch = title.includes(searchInput);
+                const matchesCategory = categoryFilter === 'all' || category === categoryFilter;
+                const matchesStatus = statusFilter === 'all' || status === statusFilter;
+            
+                card.style.display = matchesSearch && matchesCategory && matchesStatus ? 'block' : 'none';
+                });
         }
 
         // Filter LLM Documents
@@ -856,7 +1774,161 @@
             });
         });
 
-        
+        // Initialize chart
+        const ctx = document.getElementById('analyticsChart').getContext('2d');
+        const analyticsChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                datasets: [{
+                    label: 'Trainings Completed',
+                    data: [12, 19, 15, 20, 18, 25, 22],
+                    backgroundColor: 'rgba(110, 72, 170, 0.7)',
+                    borderColor: 'rgba(110, 72, 170, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'New Users',
+                    data: [8, 12, 10, 15, 14, 18, 16],
+                    backgroundColor: 'rgba(157, 80, 187, 0.7)',
+                    borderColor: 'rgba(157, 80, 187, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                }
+            }
+        });
+
+        // Toggle chart period
+        document.querySelectorAll('.chart-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                // Here you would update the chart data based on the selected period
+            });
+        });
+
+        // Navigation links
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                showSection(this.getAttribute('href').substring(1));
+            });
+        });
+        // Show/hide password toggle
+        document.querySelectorAll('.toggle-password').forEach(icon => {
+            icon.addEventListener('click', function() {
+                const input = this.previousElementSibling;
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                input.setAttribute('type', type);
+                this.classList.toggle('fa-eye');
+                this.classList.toggle('fa-eye-slash');
+            });
+        });
+
+        // Section navigation
+        function showSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById(sectionId).style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        // Filter users
+        function filterUsers() {
+            const searchInput = document.getElementById('userSearchInput').value.toLowerCase();
+            const filterValue = document.getElementById('userFilter').value;
+            const rows = document.querySelectorAll('#userTableBody tr');
+            
+            rows.forEach(row => {
+                const name = row.children[1].textContent.toLowerCase();
+                const role = row.children[2].textContent.trim().toLowerCase();
+                
+                const matchesSearch = name.includes(searchInput);
+                const matchesFilter = filterValue === 'all' || role === filterValue;
+                
+                row.style.display = matchesSearch && matchesFilter ? '' : 'none';
+            });
+        }
+
+        // Filter LLM documents
+        function filterLLMDocs() {
+            const searchInput = document.getElementById('llmSearchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#llmTableBody tr');
+            
+            rows.forEach(row => {
+                const name = row.children[0].textContent.toLowerCase();
+                row.style.display = name.includes(searchInput) ? '' : 'none';
+            });
+        }
+
+        // Initialize event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // User search and filter
+            document.getElementById('userSearchInput').addEventListener('input', filterUsers);
+            document.getElementById('userFilter').addEventListener('change', filterUsers);
+            
+            // LLM document search
+            document.getElementById('llmSearchInput').addEventListener('input', filterLLMDocs);
+            
+            // File upload hover effects
+            document.querySelectorAll('.file-upload').forEach(upload => {
+                const input = upload.querySelector('input[type="file"]');
+                const hint = upload.querySelector('.file-hint');
+                
+                input.addEventListener('change', function() {
+                    if (this.files.length > 0) {
+                        hint.textContent = this.files[0].name;
+                    }
+                });
+                
+                upload.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    upload.style.backgroundColor = 'rgba(110,72,170,0.05)';
+                });
+                
+                upload.addEventListener('dragleave', () => {
+                    upload.style.backgroundColor = '';
+                });
+                
+                upload.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    upload.style.backgroundColor = '';
+                    if (e.dataTransfer.files.length > 0) {
+                        input.files = e.dataTransfer.files;
+                        hint.textContent = e.dataTransfer.files[0].name;
+                    }
+                });
+            });
+        });
+
+        // Form validation for training dates
+        document.getElementById('trainingForm')?.addEventListener('submit', function(e) {
+            const startDate = new Date(document.getElementById('start_date').value);
+            const endDate = new Date(document.getElementById('end_date').value);
+            
+            if (startDate > endDate) {
+                e.preventDefault();
+                alert('End date must be after start date');
+            }
+        });
     </script>
 </body>
 </html>
