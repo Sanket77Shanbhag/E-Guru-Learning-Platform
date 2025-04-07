@@ -1,0 +1,133 @@
+[{
+  "_id": {
+    "$oid": "67e4e6d2d7dac5f1f0efac7e"
+  },
+  "title": "Wings of Innovation: Aerodynamics Masterclass",
+  "description": "Soar through the world of aerodynamics and discover the science behind aircraft flight.",
+  "category": "aerodynamics",
+  "status": "active",
+  "instructor_pb_number": "PB54321",
+  "instructor_name": "Shashanka",
+  "start_date": {
+    "$date": "2025-03-10T00:00:00.000Z"
+  },
+  "end_date": {
+    "$date": "2025-04-21T00:00:00.000Z"
+  },
+  "duration": "42 days",
+  "image_url": "training_images\\Aerodynamics.webp"
+},
+{
+  "_id": {
+    "$oid": "67e4e716d7dac5f1f0efac7f"
+  },
+  "title": "Skyward Bound: The Future of Aviation",
+  "description": "Embark on a journey into the aviation industry with insights into aircraft operations, safety, and management.",
+  "category": "aviation",
+  "status": "upcoming",
+  "instructor_pb_number": "PB12345",
+  "instructor_name": "Sanket Shanbhag",
+  "start_date": {
+    "$date": "2025-03-28T00:00:00.000Z"
+  },
+  "end_date": {
+    "$date": "2025-06-27T00:00:00.000Z"
+  },
+  "duration": "91 days",
+  "image_url": "training_images\\Aviation.webp"
+},
+{
+  "_id": {
+    "$oid": "67e4e765d7dac5f1f0efac80"
+  },
+  "title": "Boardroom Brilliance: Corporate Leadership Essentials",
+  "description": "Master leadership and decision-making with this immersive corporate training program.",
+  "category": "corporate",
+  "status": "completed",
+  "instructor_pb_number": "PB54321",
+  "instructor_name": "Shashanka",
+  "start_date": {
+    "$date": "2024-12-06T00:00:00.000Z"
+  },
+  "end_date": {
+    "$date": "2025-03-20T00:00:00.000Z"
+  },
+  "duration": "104 days",
+  "image_url": "training_images\\Corporate.webp"
+},
+{
+  "_id": {
+    "$oid": "67e4e7c0d7dac5f1f0efac81"
+  },
+  "title": "Strategic Vision: Management in Action",
+  "description": "Develop a strategic mindset and lead organizations effectively with practical management lessons.",
+  "category": "management",
+  "status": "upcoming",
+  "instructor_pb_number": "PB54321",
+  "instructor_name": "Shashanka",
+  "start_date": {
+    "$date": "2025-04-01T00:00:00.000Z"
+  },
+  "end_date": {
+    "$date": "2025-04-30T00:00:00.000Z"
+  },
+  "duration": "29 days",
+  "image_url": "training_images\\Management.webp"
+},
+{
+  "_id": {
+    "$oid": "67e4e887d7dac5f1f0efac82"
+  },
+  "title": "Unlock Your Best Self: The Art of Personality Development",
+  "description": "Enhance your confidence, communication, and interpersonal skills to achieve personal and professional growth.",
+  "category": "personality-development",
+  "status": "active",
+  "instructor_pb_number": "PB12345",
+  "instructor_name": "Sanket Shanbhag",
+  "start_date": {
+    "$date": "2025-03-01T00:00:00.000Z"
+  },
+  "end_date": {
+    "$date": "2025-05-31T00:00:00.000Z"
+  },
+  "duration": "91 days",
+  "image_url": "training_images\\Personality Development.webp"
+},
+{
+  "_id": {
+    "$oid": "67e4eb0fd7dac5f1f0efac83"
+  },
+  "title": "Future-Ready Tech: Hands-on Technical Training",
+  "description": "Dive into emerging technologies, learn coding best practices, and build software projects with confidence.",
+  "category": "technical",
+  "status": "upcoming",
+  "instructor_pb_number": "PB54321",
+  "instructor_name": "Shashanka",
+  "start_date": {
+    "$date": "2025-03-28T00:00:00.000Z"
+  },
+  "end_date": {
+    "$date": "2025-08-01T00:00:00.000Z"
+  },
+  "duration": "126 days",
+  "image_url": "training_images\\Technical.webp"
+},
+{
+  "_id": {
+    "$oid": "67f3669049f8ea20f8462c37"
+  },
+  "title": "njfncj",
+  "description": "ndmn",
+  "category": "aerodynamics",
+  "status": "active",
+  "instructor_pb_number": "PB54321",
+  "instructor_name": "Shashanka",
+  "start_date": {
+    "$date": "2025-04-01T00:00:00.000Z"
+  },
+  "end_date": {
+    "$date": "2025-04-30T00:00:00.000Z"
+  },
+  "duration": "29 days",
+  "image_url": "training_images\\Lead Management.png"
+}]

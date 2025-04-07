@@ -1478,9 +1478,9 @@
                             <td>{{ doc.upload_date|date:"Y-m-d" }}</td>
                             <td>
                                 <div class="table-actions">
-                                    <a href="{{ doc.file_url }}'" download="{{ doc.name }}.pdf" class="action-btn" style="background: rgba(40,167,69,0.1); color: var(--success);">
+                                    <a href="{% static doc.file_url %}" download="{{ doc.name }}.pdf" class="action-btn" style="background: rgba(40,167,69,0.1); color: var(--success);">
                                         <i class="fas fa-download"></i> Download
-                                    </a>
+                                    </source>
                                     <button class="action-btn" style="background: rgba(255,101,132,0.1); color: var(--accent);">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -1501,7 +1501,7 @@
 
         
         
-        <!-- Chat Section -->
+        
         <!-- Eguru Chatbot Section -->
         <div id="eguru-chatbot" class="content-section" style="display: none;">
           <div class="chat-container">

@@ -124,7 +124,7 @@ def manage_trainings(request):
                     messages.error(request, 'Invalid image format.')
                 else:
                     # Ensure the directory exists
-                    image_directory = os.path.join('training_images')
+                    image_directory = os.path.join('main','static' ,'training_images')
                     os.makedirs(image_directory, exist_ok=True)
 
                     # Save image to static folder
@@ -149,7 +149,7 @@ def manage_trainings(request):
                         "start_date": start_date_obj,
                         "end_date": end_date_obj,
                         "duration": f"{duration_days} days",
-                        "image_url": image_path
+                        "image_url": f"training_images\{image.name}"
                     }
                     trainings_collection.insert_one(training_data)
                     messages.success(request, 'Training added successfully.')
@@ -191,7 +191,7 @@ def manage_llm(request):
                         "name": document_name,
                         "type": document.name.split('.')[-1].upper(),
                         "upload_date": datetime.now(),
-                        "file_url": f"/media/llm_documents/{document.name}"
+                        "file_url": f"\media\llm_documents\{document.name}"
                     }
                     llm_collection.insert_one(document_data)
                     messages.success(request, 'Document uploaded successfully.')

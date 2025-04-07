@@ -1,0 +1,52 @@
+[{
+  "_id": {
+    "$oid": "67e3bb5066ab5efa82861e5f"
+  },
+  "pb_number": "PB54321",
+  "password": "pbkdf2_sha256$216000$j6nZKOphyorH$K3Z4zWcb44xChjpcPMX/SDIPvSg1sSfq/w91m5TwTHk=",
+  "name": "Shashanka",
+  "gender": "Male",
+  "role": "admin",
+  "division": "HMA",
+  "department": "IT",
+  "designation": "Lecturer"
+},
+{
+  "_id": {
+    "$oid": "67e3bb7e66ab5efa82861e60"
+  },
+  "pb_number": "PB12345",
+  "password": "pbkdf2_sha256$216000$pUh4lpmCQKdG$52MATR5IcP4Fol37AjdohqlopD0ypbSrAn/5OQ6tezQ=",
+  "name": "Sanket Shanbhag",
+  "gender": "Male",
+  "role": "Admin",
+  "division": "HMA",
+  "department": "IT",
+  "designation": "Engineer"
+},
+{
+  "_id": {
+    "$oid": "67e3bbc966ab5efa82861e61"
+  },
+  "pb_number": "PB54213",
+  "password": "pbkdf2_sha256$216000$RohVVITnzFBN$taw1hx7o0wN9hqKGnmMpK3VaQk/n2ksUCxT+Ja74OKY=",
+  "name": "Sanket",
+  "gender": "Male",
+  "role": "User",
+  "division": "HMA",
+  "department": "IT",
+  "designation": "Engineer"
+},
+{
+  "_id": {
+    "$oid": "67efa904b626cf4eb981d027"
+  },
+  "pb_number": "PB90909",
+  "password": "pbkdf2_sha256$216000$yiXBzHGiUMk2$6r7MEscKXVT5Bw/mNHGipRuJkyks0Ei326S7EZHlTXA=",
+  "name": "Gagan",
+  "gender": "Male",
+  "role": "user",
+  "division": "HMA",
+  "department": "IT",
+  "designation": "Engineer"
+}]
