@@ -19,7 +19,7 @@ from django.urls import path
 from main import views
 from django.conf import settings
 from django.conf.urls.static import static
-from main.views import create_user, manage_trainings, manage_llm
+from main.views import create_user, manage_trainings, manage_llm, ask_eguru
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -31,4 +31,5 @@ urlpatterns = [
     path('create_user/', create_user, name='create_user'),
     path('manage_trainings/', manage_trainings, name='manage_trainings'),
     path('manage_llm/', manage_llm, name='manage_llm'),
+    path('ask/', ask_eguru, name='ask_eguru'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

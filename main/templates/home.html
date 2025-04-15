@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -315,7 +316,157 @@
             margin: 0 auto 2rem;
             opacity: 0.9;
         }
-        
+        /* Training Cards */
+        .training-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .training-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .training-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(110,72,170,0.1);
+        }
+
+        .training-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-active {
+            background: rgba(40,167,69,0.1);
+            color: var(--success);
+        }
+
+        .badge-upcoming {
+            background: rgba(255,193,7,0.1);
+            color: #ffc107;
+        }
+
+        .badge-completed {
+            background: rgba(108,117,125,0.1);
+            color: #6c757d;
+        }
+
+        .training-img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+        }
+
+        .training-body {
+            padding: 1.5rem;
+        }
+
+        .training-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .training-category {
+            display: inline-block;
+            background: rgba(110,72,170,0.1);
+            color: var(--primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .training-desc {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .training-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .training-instructor {
+            display: flex;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .training-instructor i {
+            margin-right: 0.5rem;
+            color: var(--primary);
+        }
+
+        .training-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-details {
+            flex: 1;
+            background: white;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-details:hover {
+            background: rgba(110,72,170,0.1);
+        }
+        @media (max-width: 576px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .training-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .btn-enroll {
+            flex: 1;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-enroll:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
         .btn-white {
             background: white;
             color: var(--primary);
@@ -534,64 +685,38 @@
             <h3>Popular Courses</h3>
             <p>Browse our most popular courses and start learning today</p>
         </div>
-        <div class="course-slider">
-            <div class="course-card">
-                <div class="course-image">
-                    <img src="https://via.placeholder.com/300x180" alt="Web Development">
-                </div>
-                <div class="course-info">
-                    <span class="course-category">Development</span>
-                    <h5 class="course-title">Complete Web Development Bootcamp</h5>
-                    <p class="course-instructor">By Alex Johnson</p>
-                    <div class="course-meta">
-                        <span><i class="fas fa-users"></i> 1,245 students</span>
-                        <span class="course-rating"><i class="fas fa-star"></i> 4.9</span>
+        <div class="training-grid" id="trainingsContainer">
+            {% for training in all_trainings %}
+            <div class="training-card" data-category="{{ training.category }}" data-status="{{ training.status }}">
+                <span class="training-badge {% if training.status == 'active' %}badge-active{% elif training.status == 'upcoming' %}badge-upcoming{% else %}badge-completed{% endif %}">
+                    {{ training.status|title }}
+                </span>
+                <img src="{% static training.image_url %}" class="training-img" alt="{{ training.title }}">
+                
+                <div class="training-body">
+                    <h3 class="training-title">{{ training.title }}</h3>
+                    <span class="training-category">{{ training.category|title }}</span>
+                    <p class="training-desc">{{ training.description }}</p>
+                    
+                    <div class="training-instructor">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        <span>{{ training.instructor_name }}</span>
+                    </div>
+                    
+                    <div class="training-meta">
+                        <span>{{ training.duration }}</span>
+                        <span>{{ training.start_date|date:"d M Y" }} - {{ training.end_date|date:"d M Y" }}</span>
+                    </div>
+                    
+                    <div class="training-actions">
+                        <a href="signin" ><button class="btn-details">Details</button></a>
+                        <a href="signin" ><button class="btn-enroll">Enroll</button></a>
                     </div>
                 </div>
             </div>
-            <div class="course-card">
-                <div class="course-image">
-                    <img src="https://via.placeholder.com/300x180" alt="Data Science">
-                </div>
-                <div class="course-info">
-                    <span class="course-category">Data Science</span>
-                    <h5 class="course-title">Data Science & Machine Learning A-Z</h5>
-                    <p class="course-instructor">By Sarah Miller</p>
-                    <div class="course-meta">
-                        <span><i class="fas fa-users"></i> 892 students</span>
-                        <span class="course-rating"><i class="fas fa-star"></i> 4.8</span>
-                    </div>
-                </div>
-            </div>
-            <div class="course-card">
-                <div class="course-image">
-                    <img src="https://via.placeholder.com/300x180" alt="Digital Marketing">
-                </div>
-                <div class="course-info">
-                    <span class="course-category">Marketing</span>
-                    <h5 class="course-title">Digital Marketing Masterclass</h5>
-                    <p class="course-instructor">By Michael Chen</p>
-                    <div class="course-meta">
-                        <span><i class="fas fa-users"></i> 1,532 students</span>
-                        <span class="course-rating"><i class="fas fa-star"></i> 4.7</span>
-                    </div>
-                </div>
-            </div>
-            <div class="course-card">
-                <div class="course-image">
-                    <img src="https://via.placeholder.com/300x180" alt="Mobile App Development">
-                </div>
-                <div class="course-info">
-                    <span class="course-category">Development</span>
-                    <h5 class="course-title">Flutter & Dart - Complete App Development</h5>
-                    <p class="course-instructor">By David Wilson</p>
-                    <div class="course-meta">
-                        <span><i class="fas fa-users"></i> 756 students</span>
-                        <span class="course-rating"><i class="fas fa-star"></i> 4.9</span>
-                    </div>
-                </div>
-            </div>
+            {% endfor %}
         </div>
+        
     </section>
     
     <section class="cta">

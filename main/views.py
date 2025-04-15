@@ -8,7 +8,19 @@ from .models import User, users_collection, Training
 from pymongo import MongoClient
 from datetime import datetime
 import os
+from sentence_transformers import SentenceTransformer
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import pipeline
+from django.conf import settings
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST, require_GET
+from django.contrib.auth.decorators import login_required
+from .models import ChatSession, ChatMessage
+import requests
+import json
+import numpy as np
+import fitz
 
 # MongoDB connection
 client = MongoClient('mongodb://localhost:27017/')
@@ -16,6 +28,9 @@ db = client['eguru']
 users_collection = db['users']
 trainings_collection = db['trainings']
 llm_collection = db['document']
+collection = db['eguru-llm-index']
+
+embedder = SentenceTransformer('all-MiniLM-L6-v2')
 
 def signin(request):
     if request.method == 'POST':
@@ -95,7 +110,8 @@ def signout(request):
     return redirect('signin')
 
 def home(request):
-    return render(request, 'home.html')
+    all_trainings = list(trainings_collection.find({}))
+    return render(request, 'home.html' , {'all_trainings': all_trainings})
 
 def manage_trainings(request):
     if request.method == 'POST':
@@ -177,7 +193,7 @@ def manage_llm(request):
                     messages.error(request, 'Invalid file format.')
                 else:
                     # Ensure directory exists
-                    document_directory = os.path.join('media', 'llm_documents')
+                    document_directory = os.path.join('main','static','llm_documents')
                     os.makedirs(document_directory, exist_ok=True)
 
                     # Save document to media folder
@@ -191,7 +207,7 @@ def manage_llm(request):
                         "name": document_name,
                         "type": document.name.split('.')[-1].upper(),
                         "upload_date": datetime.now(),
-                        "file_url": f"\media\llm_documents\{document.name}"
+                        "file_url": f"llm_documents\{document.name}"
                     }
                     llm_collection.insert_one(document_data)
                     messages.success(request, 'Document uploaded successfully.')
@@ -273,3 +289,54 @@ def delete_user(request, user_id):
     # Implementation for deleting users
     messages.info(request, 'Delete user functionality will be implemented soon.')
     return redirect('admin_dashboard')
+
+
+# Semantic Search
+def find_relevant_chunks(query, top_k=5):
+    query_emb = embedder.encode(query)
+    all_docs = list(collection.find({}))
+    for doc in all_docs:
+        doc["score"] = np.dot(doc["embedding"], query_emb)
+    sorted_docs = sorted(all_docs, key=lambda x: x["score"], reverse=True)
+    return sorted_docs[:top_k]
+
+# Call Ollama with context
+def ask_ollama_with_context(context_chunks, user_query):
+    context_text = "\n\n".join([
+        f"[{doc['filename']} - Page {doc['page_number']}]\n{doc['text']}"
+        for doc in context_chunks
+    ])
+
+    messages = [
+        {"role": "system", "content": "You are a helpful assistant. Use the provided document context to answer the question."},
+        {"role": "user", "content": f"Context:\n{context_text}"},
+        {"role": "user", "content": user_query}
+    ]
+
+    response = requests.post(
+        "http://127.0.0.1:8000/ask/",
+        json={"model": "llama3", "messages": messages, "stream": False}
+    )
+
+    return response.json()["message"]["content"]
+
+# Django view to handle chat request
+@csrf_exempt
+def ask_eguru(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            query = data.get("query", "").strip()
+
+            if not query:
+                return JsonResponse({"response": "Please provide a valid question."}, status=400)
+
+            chunks = find_relevant_chunks(query)
+            answer = ask_ollama_with_context(chunks, query)
+
+            return JsonResponse({"response": answer})
+
+        except Exception as e:
+            return JsonResponse({"response": f"❌ Error: {str(e)}"}, status=500)
+
+    return JsonResponse({"response": "Invalid request method"}, status=405)

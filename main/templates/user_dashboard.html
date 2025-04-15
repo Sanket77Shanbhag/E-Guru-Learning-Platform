@@ -822,6 +822,7 @@
                             <p><strong>PB Number:</strong> {{ user.pb_number }}</p>
                             <p><strong>Name:</strong> {{ user.name }}</p>
                             <p><strong>Gender:</strong> {{ user.gender }}</p>
+                            <p><strong>Role:</strong> {{ user.role }}</p>
                             <p><strong>Division:</strong> {{ user.division|default:'N/A' }}</p>
                             <p><strong>Department:</strong> {{ user.department|default:'N/A' }}</p>
                             <p><strong>Designation:</strong> {{ user.designation|default:'N/A' }}</p>
@@ -1083,6 +1084,47 @@
             });
         }
 
+        document.getElementById('sendButton').addEventListener('click', async function () {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (!message) return;
+        
+            const chatBox = document.getElementById('chatMessage');
+            chatBox.innerHTML += `
+                <div class="message user-message">
+                    <div class="message-content">${message}</div>
+                    <div class="message-info"><span>You • Just now</span></div>
+                </div>`;
+        
+            input.value = '';
+            document.getElementById('typingIndicator').style.display = 'block';
+        
+            try {
+                const response = await fetch('/ask/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: message })
+                });
+        
+                const data = await response.json();
+        
+                chatBox.innerHTML += `
+                    <div class="message bot-message">
+                        <div class="message-content">${data.response}</div>
+                        <div class="message-info"><span>eGuru • Just now</span></div>
+                    </div>`;
+            } catch (error) {
+                chatBox.innerHTML += `
+                    <div class="message bot-message">
+                        <div class="message-content">⚠️ Something went wrong.</div>
+                        <div class="message-info"><span>eGuru • Just now</span></div>
+                    </div>`;
+                console.error('Chat error:', error);
+            } finally {
+                document.getElementById('typingIndicator').style.display = 'none';
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        });
         // Initialize progress chart
         function initProgressChart() {
             const ctx = document.getElementById('progressChart').getContext('2d');
@@ -1136,19 +1178,13 @@
                 data: {
                     labels: ['Completed', 'In Progress', 'Upcoming'],
                     datasets: [{
-                        label: 'Training Status',
-                        data: [{{ completed_courses }}, {{ enrolled_courses }}, {{ interested_courses }}],
+                        data: [300, 50, 100],
                         backgroundColor: [
-                            'rgba(110, 72, 170, 0.2)',
-                            'rgba(157, 80, 187, 0.2)',
-                            'rgba(40, 167, 69, 0.2)'
+                            'rgba(110, 72, 170, 0.8)',
+                            'rgba(157, 80, 187, 0.8)',
+                            'rgba(40, 167, 69, 0.8)'
                         ],
-                        borderColor: [
-                            'rgba(110, 72, 170, 1)',
-                            'rgba(157, 80, 187, 1)',
-                            'rgba(40, 167, 69, 1)'
-                        ],
-                        borderWidth: 2
+                        borderWidth: 1
                     }]
                 },
                 options: {
@@ -1158,8 +1194,11 @@
                             position: 'top',
                         },
                         tooltip: {
-                            mode: 'index',
-                            intersect: false,
+                            callbacks: {
+                                label: function(tooltipItem) {
+                                    return tooltipItem.label + ': ' + tooltipItem.raw;
+                                }
+                            }
                         }
                     }
                 }

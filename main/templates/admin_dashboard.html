@@ -1073,7 +1073,6 @@
                     <div class="user-role">Admin</div>
                 </div>
                 <i class="fas fa-chevron-down ml-2" style="font-size: 0.8rem;"></i>
-                
                 <div class="profile-dropdown" id="profileDropdown">
                     <div class="profile-info">
                         <p><strong>PB Number:</strong> {{ admin.pb_number }}</p>
@@ -1478,7 +1477,7 @@
                             <td>{{ doc.upload_date|date:"Y-m-d" }}</td>
                             <td>
                                 <div class="table-actions">
-                                    <a href="{% static doc.file_url %}" download="{{ doc.name }}.pdf" class="action-btn" style="background: rgba(40,167,69,0.1); color: var(--success);">
+                                    <a href= "{% static doc.file_url %}" download="{{ doc.name }}.pdf" class="action-btn" style="background: rgba(40,167,69,0.1); color: var(--success);">
                                         <i class="fas fa-download"></i> Download
                                     </source>
                                     <button class="action-btn" style="background: rgba(255,101,132,0.1); color: var(--accent);">
@@ -1545,8 +1544,8 @@
                 <input type="text" id="messageInput" placeholder="Message eGuru..." autocomplete="off">
                 <button id="sendButton">Send</button>
             </div>
-       </div>          
-   
+        </div>          
+
     </div>
 
     <script>
