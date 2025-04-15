@@ -1745,17 +1745,47 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        // Generate a simple bot response (in a real app, this would call an API)
-        function getBotResponse(userMessage) {
-            const responses = [
-                "I understand you're asking about: " + userMessage + ". Can you provide more details?",
-                "That's an interesting question. Here's what I can tell you...",
-                "I can help with that. Let me explain...",
-                "Thanks for your question. The answer is...",
-                "I'm designed to assist with educational topics. For your query about '" + userMessage + "', I recommend checking our knowledge base."
-            ];
-            return responses[Math.floor(Math.random() * responses.length)];
-        }
+        document.getElementById('sendButton').addEventListener('click', async function () {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (!message) return;
+        
+            const chatBox = document.getElementById('chatMessage');
+            chatBox.innerHTML += `
+                <div class="message user-message">
+                    <div class="message-content">${message}</div>
+                    <div class="message-info"><span>You • Just now</span></div>
+                </div>`;
+        
+            input.value = '';
+            document.getElementById('typingIndicator').style.display = 'block';
+        
+            try {
+                const response = await fetch('/ask/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: message })
+                });
+        
+                const data = await response.json();
+        
+                chatBox.innerHTML += `
+                    <div class="message bot-message">
+                        <div class="message-content">${data.response}</div>
+                        <div class="message-info"><span>eGuru • Just now</span></div>
+                    </div>`;
+            } catch (error) {
+                chatBox.innerHTML += `
+                    <div class="message bot-message">
+                        <div class="message-content">⚠️ Something went wrong.</div>
+                        <div class="message-info"><span>eGuru • Just now</span></div>
+                    </div>`;
+                console.error('Chat error:', error);
+            } finally {
+                document.getElementById('typingIndicator').style.display = 'none';
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        });
 
         // Event listeners
         sendButton.addEventListener('click', sendMessage);

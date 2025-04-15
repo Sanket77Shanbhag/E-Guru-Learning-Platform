@@ -21,6 +21,12 @@ import requests
 import json
 import numpy as np
 import fitz
+import subprocess
+import socket
+import time
+from docx import Document
+from pptx import Presentation
+from uuid import uuid4
 
 # MongoDB connection
 client = MongoClient('mongodb://localhost:27017/')
@@ -29,6 +35,10 @@ users_collection = db['users']
 trainings_collection = db['trainings']
 llm_collection = db['document']
 collection = db['eguru-llm-index']
+
+# Constants for chunking
+CHUNK_SIZE = 500
+CHUNK_OVERLAP = 50
 
 embedder = SentenceTransformer('all-MiniLM-L6-v2')
 
@@ -108,6 +118,27 @@ def signout(request):
     
     messages.success(request, 'You have been logged out.')
     return redirect('signin')
+
+def ensure_ollama_running():
+    host = "localhost"
+    port = 11434
+
+    # Check if port is active (Ollama running)
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        if sock.connect_ex((host, port)) == 0:
+            print("✅ Ollama is already running.")
+            return
+
+    print("⏳ Starting Ollama with llama3 model...")
+    try:
+        subprocess.Popen(
+            ["ollama", "run", "llama3"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        time.sleep(5)  # Wait briefly for server to start
+    except Exception as e:
+        print(f"❌ Failed to start Ollama: {e}")
 
 def home(request):
     all_trainings = list(trainings_collection.find({}))
@@ -210,6 +241,8 @@ def manage_llm(request):
                         "file_url": f"llm_documents\{document.name}"
                     }
                     llm_collection.insert_one(document_data)
+                    # Index the document
+                    index_single_document(document_path)
                     messages.success(request, 'Document uploaded successfully.')
                     return redirect('admin_dashboard')
 
@@ -302,6 +335,7 @@ def find_relevant_chunks(query, top_k=5):
 
 # Call Ollama with context
 def ask_ollama_with_context(context_chunks, user_query):
+    ensure_ollama_running()
     context_text = "\n\n".join([
         f"[{doc['filename']} - Page {doc['page_number']}]\n{doc['text']}"
         for doc in context_chunks
@@ -314,11 +348,19 @@ def ask_ollama_with_context(context_chunks, user_query):
     ]
 
     response = requests.post(
-        "http://127.0.0.1:8000/ask/",
+        "http://localhost:11434/api/chat",
         json={"model": "llama3", "messages": messages, "stream": False}
     )
 
-    return response.json()["message"]["content"]
+    # ✅ Add this check
+    try:
+        json_response = response.json()
+        if "message" not in json_response:
+            return f"⚠️ Ollama error: {json_response.get('error', 'Unknown response')}"
+        return json_response["message"]["content"]
+    except Exception as e:
+        return f"❌ Failed to decode Ollama response: {str(e)}"
+
 
 # Django view to handle chat request
 @csrf_exempt
@@ -340,3 +382,72 @@ def ask_eguru(request):
             return JsonResponse({"response": f"❌ Error: {str(e)}"}, status=500)
 
     return JsonResponse({"response": "Invalid request method"}, status=405)
+
+def chunk_text(text, chunk_size=CHUNK_SIZE, overlap=CHUNK_OVERLAP):
+    chunks = []
+    start = 0
+    while start < len(text):
+        end = start + chunk_size
+        chunks.append(text[start:end])
+        start += chunk_size - overlap
+    return chunks
+
+# ---------- File Extractors ----------
+def extract_pdf(file_path):
+    doc = fitz.open(file_path)
+    contents = []
+    for i, page in enumerate(doc, start=1):
+        text = page.get_text()
+        if text.strip():
+            contents.append({
+                "filename": os.path.basename(file_path),
+                "page_number": i,
+                "text": text
+            })
+    return contents
+
+def extract_docx(file_path):
+    doc = Document(file_path)
+    full_text = "\n".join([p.text for p in doc.paragraphs if p.text.strip()])
+    return [{
+        "filename": os.path.basename(file_path),
+        "page_number": 1,
+        "text": full_text
+    }]
+
+def extract_pptx(file_path):
+    prs = Presentation(file_path)
+    contents = []
+    for i, slide in enumerate(prs.slides, start=1):
+        text = "\n".join([shape.text for shape in slide.shapes if hasattr(shape, "text")])
+        if text.strip():
+            contents.append({
+                "filename": os.path.basename(file_path),
+                "page_number": i,
+                "text": text
+            })
+    return contents
+
+def index_single_document(file_path):
+    ext = file_path.lower()
+    if ext.endswith(".pdf"):
+        docs = extract_pdf(file_path)
+    elif ext.endswith(".docx"):
+        docs = extract_docx(file_path)
+    elif ext.endswith(".pptx") or ext.endswith(".ppt"):
+        docs = extract_pptx(file_path)
+    else:
+        return  # unsupported
+
+    for doc in docs:
+        chunks = chunk_text(doc["text"])
+        for i, chunk in enumerate(chunks):
+            embedding = embedder.encode(chunk).tolist()
+            collection.insert_one({
+                "chunk_id": str(uuid4()),
+                "filename": doc["filename"],
+                "page_number": doc["page_number"],
+                "chunk_index": i,
+                "text": chunk,
+                "embedding": embedding
+            })
