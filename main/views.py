@@ -1,22 +1,13 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
 from django.contrib.auth.hashers import make_password, check_password
-from .forms import LoginForm, UserRegistrationForm, TrainingForm
-from .models import User, users_collection, Training
 from pymongo import MongoClient
 from datetime import datetime
 import os
 from sentence_transformers import SentenceTransformer
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from transformers import pipeline
-from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST, require_GET
-from django.contrib.auth.decorators import login_required
-from .models import ChatSession, ChatMessage
 import requests
 import json
 import numpy as np
@@ -264,7 +255,8 @@ def user_dashboard(request):
     pb_number = request.session.get('pb_number')
     user_data = users_collection.find_one({"pb_number": pb_number})
     all_trainings = list(trainings_collection.find({}))
-    return render(request, 'user_dashboard.html', {'user': user_data, 'all_trainings': all_trainings})
+    uploaded_documents = list(llm_collection.find({}))
+    return render(request, 'user_dashboard.html', {'user': user_data, 'all_trainings': all_trainings, "uploaded_documents": uploaded_documents})
 
 def create_user(request):
     if request.method == 'POST':

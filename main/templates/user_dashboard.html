@@ -528,6 +528,56 @@
             background: rgba(110,72,170,0.1);
         }
 
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 1.5rem 0;
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .data-table th {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tr:hover td {
+            background-color: rgba(110,72,170,0.05);
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
         /* Chatbot Styles */
         .chat-container {
             display: flex;
@@ -801,7 +851,8 @@
             <ul class="nav-menu">
                 <li class="nav-item"><a href="#dashboard" class="nav-link active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                 <li class="nav-item"><a href="#analytics" class="nav-link"><i class="fas fa-chart-line"></i> Analytics</a></li>
-                <li class="nav-item"><a href="#all-trainings" class="nav-link"><i class="fas fa-book-open"></i> All Trainings</a></li>
+                <li class="nav-item"><a href="#all-trainings" class="nav-link"><i class="fas fa-book-reader"></i> All Trainings</a></li>
+                <li class="nav-item"><a href="#uploaded-llm-docs" class="nav-link"><i class="fas fa-book-open"></i> Reference Documents</a></li>
                 <button class="chat-btn" onclick="showChatSection()"><i class="fas fa-comment-dots"></i> Chat with eGuru</button>
             </ul>
         </div>
@@ -948,6 +999,57 @@
                     {% endfor %}
                 </div>
             </div>
+
+            <!-- Uploaded LLM Documents Section -->
+            <div id="uploaded-llm-docs" class="content-section">
+                <div class="filter-bar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" class="search-input" placeholder="Search documents..." id="llmSearchInput">
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Document Name</th>
+                                <th>Type</th>
+                                <th>Upload Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="llmTableBody">
+                            {% for doc in uploaded_documents %}
+                            <tr>
+                                <td>{{ doc.name }}</td>
+                                <td>
+                                    <span class="badge" style="background: rgba(110,72,170,0.1); color: var(--primary); padding: 0.25rem 0.5rem; border-radius: 20px; font-size: 0.75rem;">
+                                        {{ doc.type }}
+                                    </span>
+                                </td>
+                                <td>{{ doc.upload_date|date:"Y-m-d" }}</td>
+                                <td>
+                                    <div class="table-actions">
+                                        <a href= "{% static doc.file_url %}" download="{{ doc.name }}.pdf" class="action-btn" style="background: rgba(40,167,69,0.1); color: var(--success);">
+                                            <i class="fas fa-download"></i> Download</a>
+                                        {% comment %} <button class="action-btn" style="background: rgba(255,101,132,0.1); color: var(--accent);">
+                                            <i class="fas fa-trash"></i>
+                                        </button> {% endcomment %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-light);">
+                                    No documents uploaded yet.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             
             <!-- eGuru Chatbot Section -->
             <div id="eguru-chatbot" class="content-section">
@@ -957,9 +1059,6 @@
                             <img src="/static/icon.webp" alt="eGuru Logo" class="logo2">
                             <h2>eGuru Chatbot</h2>
                         </div>
-                        <div>
-                            <span>v1.0</span>
-                        </div>
                     </div>
             
                     <div class="chat-messages" id="chatMessage">
@@ -968,7 +1067,7 @@
                                 Hello! I'm eGuru, your AI assistant. Ask me academic related queries.
                             </div>
                             <div class="message-info">
-                                <span>eGuru • Just now</span>
+                                <span>eGuru</span>
                             </div>
                         </div>
             
@@ -979,15 +1078,7 @@
                                 <div class="typing-dot"></div>
                             </div>
                         </div>
-                    </div>
-            
-                    <div class="suggestions">
-                        <button class="suggestion-btn">What is eGuru?</button>
-                        <button class="suggestion-btn">How to use this platform?</button>
-                        <button class="suggestion-btn">Troubleshooting help</button>
-                        <button class="suggestion-btn">Latest features</button>
-                    </div>
-            
+                    </div>            
                     <div class="input-area">
                         <input type="text" id="messageInput" placeholder="Message eGuru..." autocomplete="off">
                         <button id="sendButton">Send</button>
@@ -1093,7 +1184,7 @@
             chatBox.innerHTML += `
                 <div class="message user-message">
                     <div class="message-content">${message}</div>
-                    <div class="message-info"><span>You • Just now</span></div>
+                    <div class="message-info"><span>You</span></div>
                 </div>`;
         
             input.value = '';
@@ -1111,13 +1202,13 @@
                 chatBox.innerHTML += `
                     <div class="message bot-message">
                         <div class="message-content">${data.response}</div>
-                        <div class="message-info"><span>eGuru • Just now</span></div>
+                        <div class="message-info"><span>eGuru</span></div>
                     </div>`;
             } catch (error) {
                 chatBox.innerHTML += `
                     <div class="message bot-message">
                         <div class="message-content">⚠️ Something went wrong.</div>
-                        <div class="message-info"><span>eGuru • Just now</span></div>
+                        <div class="message-info"><span>eGuru</span></div>
                     </div>`;
                 console.error('Chat error:', error);
             } finally {

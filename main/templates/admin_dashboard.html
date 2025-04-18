@@ -1478,11 +1478,10 @@
                             <td>
                                 <div class="table-actions">
                                     <a href= "{% static doc.file_url %}" download="{{ doc.name }}.pdf" class="action-btn" style="background: rgba(40,167,69,0.1); color: var(--success);">
-                                        <i class="fas fa-download"></i> Download
-                                    </source>
-                                    <button class="action-btn" style="background: rgba(255,101,132,0.1); color: var(--accent);">
+                                        <i class="fas fa-download"></i> Download</a>
+                                    {% comment %} <button class="action-btn" style="background: rgba(255,101,132,0.1); color: var(--accent);">
                                         <i class="fas fa-trash"></i>
-                                    </button>
+                                    </button> {% endcomment %}
                                 </div>
                             </td>
                         </tr>
@@ -1520,7 +1519,7 @@
                         Hello! I'm eGuru, your AI assistant. Ask me academic related queries.
                     </div>
                     <div class="message-info">
-                        <span>eGuru • Just now</span>
+                        <span>eGuru</span>
                     </div>
                 </div>
     
@@ -1698,52 +1697,8 @@
 
           alert(`Document "${fileName}" uploaded successfully!`);
         }
-
-        const chatMessages = document.getElementById('chatMessage');
-        const messageInput = document.getElementById('messageInput');
-        const sendButton = document.getElementById('sendButton');
-        const typingIndicator = document.getElementById('typingIndicator');
-
-        // Handle sending messages
-        function sendMessage() {
-            const message = messageInput.value.trim();
-            if (message === '') return;
-
-            // Add user message to chat
-            addMessage(message, 'user');
-            messageInput.value = '';
-            
-            // Show typing indicator
-            typingIndicator.style.display = 'block';
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            
-            // Simulate bot response after a delay
-            setTimeout(() => {
-                typingIndicator.style.display = 'none';
-                const botResponse = getBotResponse(message);
-                addMessage(botResponse, 'bot');
-            }, 1000 + Math.random() * 2000);
-        }
-
-        // Add a message to the chat
-        function addMessage(content, sender) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender}-message`;
-            
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
-            contentDiv.textContent = content;
-            
-            const infoDiv = document.createElement('div');
-            infoDiv.className = 'message-info';
-            infoDiv.innerHTML = `<span>${sender === 'user' ? 'You' : 'eGuru'} • Just now</span>`;
-            
-            messageDiv.appendChild(contentDiv);
-            messageDiv.appendChild(infoDiv);
-            
-            chatMessages.insertBefore(messageDiv, typingIndicator);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
+        
+        
 
         document.getElementById('sendButton').addEventListener('click', async function () {
             const input = document.getElementById('messageInput');
@@ -1754,7 +1709,7 @@
             chatBox.innerHTML += `
                 <div class="message user-message">
                     <div class="message-content">${message}</div>
-                    <div class="message-info"><span>You • Just now</span></div>
+                    <div class="message-info"><span>You</span></div>
                 </div>`;
         
             input.value = '';
@@ -1772,35 +1727,19 @@
                 chatBox.innerHTML += `
                     <div class="message bot-message">
                         <div class="message-content">${data.response}</div>
-                        <div class="message-info"><span>eGuru • Just now</span></div>
+                        <div class="message-info"><span>eGuru</span></div>
                     </div>`;
             } catch (error) {
                 chatBox.innerHTML += `
                     <div class="message bot-message">
                         <div class="message-content">⚠️ Something went wrong.</div>
-                        <div class="message-info"><span>eGuru • Just now</span></div>
+                        <div class="message-info"><span>eGuru</span></div>
                     </div>`;
                 console.error('Chat error:', error);
             } finally {
                 document.getElementById('typingIndicator').style.display = 'none';
                 chatBox.scrollTop = chatBox.scrollHeight;
             }
-        });
-
-        // Event listeners
-        sendButton.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-
-        // Add click handlers for suggestion buttons
-        document.querySelectorAll('.suggestion-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                messageInput.value = button.textContent;
-                messageInput.focus();
-            });
         });
 
         // Initialize chart
