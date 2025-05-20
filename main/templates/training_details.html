@@ -1,0 +1,1098 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training - eGuru</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6e48aa;
+            --secondary: #9d50bb;
+            --accent: #ff6584;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --success: #28a745;
+            --card-bg: #ffffff;
+            --sidebar-bg: #f0f2f5;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --bg-color: #f5f7fa;
+            --border-color: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            min-height: 100vh;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        .training-container {
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .training-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .back-btn {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn-view {
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .btn-add {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .btn-add:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(110,72,170,0.2);
+        }
+
+        .training-content {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .course-details {
+            flex: 2;
+            min-width: 0;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+
+        .course-image {
+            width: 100%;
+            height: 250px;
+            max-height: 40vh;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .course-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+            word-wrap: break-word;
+        }
+
+        .course-instructor {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: var(--text-light);
+            flex-wrap: wrap;
+        }
+
+        .course-meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            color: var(--text-light);
+            font-size: 14px;
+            flex-wrap: wrap;
+        }
+
+        /* Tabs Container */
+        .course-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 30px;
+            gap: 15px;
+            padding-left: 0;
+            list-style: none;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .course-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            position: relative;
+            font-size: 16px;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            border-radius: 4px 4px 0 0;
+            background-color: transparent;
+            border: none;
+            white-space: nowrap;
+        }
+
+        .tab.active {
+            font-weight: 600;
+            color: var(--primary);
+            background-color: rgba(110, 72, 170, 0.05);
+        }
+
+        .tab.active:after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 3px 3px 0 0;
+        }
+
+        .tab:hover:not(.active) {
+            color: var(--text-dark);
+            background-color: var(--sidebar-bg);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+            padding: 15px 0;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+            background-color: var(--card-bg);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .benefit-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .benefit-icon {
+            color: var(--primary);
+            font-size: 22px;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .materials-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .material-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        
+        .material-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-grow: 1;
+            min-width: 0;
+        }
+        
+        .material-icon {
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(110, 72, 170, 0.1);
+            border-radius: 50%;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+        
+        .material-item h4 {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            color: var(--text-dark);
+            word-break: break-word;
+        }
+        
+        .material-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            flex-wrap: wrap;
+        }
+        
+        .material-separator {
+            height: 1px;
+            background-color: var(--border-color);
+            margin: 0.25rem 0;
+        }
+        
+        .no-materials {
+            color: var(--text-light);
+            font-style: italic;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        /* Buttons */
+        .btn-complete, .btn-delete {
+            background: white;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            color: var(--text-dark);
+            flex-shrink: 0;
+        }
+        
+        .btn-complete.completed {
+            color: var(--success);
+            border-color: var(--success);
+            background-color: rgba(40, 167, 69, 0.1);
+        }
+        
+        .btn-complete:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .btn-delete {
+            color: var(--accent);
+            background-color: rgba(255, 101, 132, 0.1);
+        }
+        
+        .btn-delete:hover {
+            background-color: rgba(255, 101, 132, 0.1);
+        }
+        
+        /* Form Toggle Styles */
+        .content-section {
+            margin-top: 1.5rem;
+            animation: fadeIn 0.3s ease;
+        }
+        .form-title {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .form-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .completion-section {
+            flex: 1;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .completion-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--text-dark);
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(110,72,170,0.3);
+        }
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+        
+        .progress-container {
+            height: 10px;
+            background-color: var(--sidebar-bg);
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        .complete-training-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 12px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            align-self: flex-end;
+            white-space: nowrap;
+        }
+
+        .complete-training-btn:hover {
+            background-color: var(--secondary);
+        }
+
+        .complete-training-btn:disabled {
+            background-color: var(--text-light);
+            cursor: not-allowed;
+        }
+
+        .completed-container {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            border-left: 5px solid var(--success);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .completed-text {
+            color: var(--success);
+            font-weight: bold;
+            margin: 0;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* Form Styles */
+        .forms-wrapper {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;    
+            flex-wrap: wrap;
+            max-width: 2500px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        .form-container {
+            background-color: var(--card-bg);
+            padding: 24px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+        }
+
+        .form-container h3 {
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .form-container.add-quiz {
+            flex: 1; 
+            min-width: 0;
+            margin: 2rem auto;
+            padding: 1.5rem; 
+            max-width: 600px;
+            max-height: none;
+        }
+        .btn-primary:hover {
+            background-color: var(--secondary);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 10px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(110, 72, 170, 0.1);
+        }
+
+        /* Responsive Breakpoints */
+        /* Large devices (desktops, 1200px and up) */
+        @media (min-width: 1200px) {
+            .training-content {
+                flex-wrap: nowrap;
+            }
+            .course-details {
+                width: 940px;
+            }
+        }
+
+        /* Medium devices (tablets, 768px to 1199px) */
+        @media (max-width: 1199px) {
+            .training-content {
+                flex-direction: column;
+            }
+            .course-details {
+                width: 100%;
+            }
+            .benefits-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+        }
+
+        /* Small devices (landscape phones, 576px to 767px) */
+        @media (max-width: 767px) {
+            .training-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .tab {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+            .course-title {
+                font-size: 20px;
+            }
+            .form-container {
+                padding: 16px;
+            }
+            .form-title {
+                font-size: 1.3rem;
+            }
+        }
+
+        /* Extra small devices (portrait phones, less than 576px) */
+        @media (max-width: 575px) {
+            .training-container {
+                padding: 15px;
+            }
+            .course-image {
+                height: 180px;
+            }
+            .benefits-grid {
+                grid-template-columns: 1fr;
+            }
+            .material-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            .material-meta {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+            .form-actions {
+                flex-direction: column;
+            }
+            .btn-primary, .btn-outline {
+                width: 100%;
+            }
+        }
+
+        /* Very small devices (phones, less than 400px) */
+        @media (max-width: 399px) {
+            .course-tabs {
+                gap: 8px;
+            }
+            .tab {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+            .back-btn, .btn-add {
+                padding: 0.6rem 1rem;
+                font-size: 0.8rem;
+            }
+            .complete-training-btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="training-container">
+        <div class="training-header">
+            <div>
+                {% if user.role|lower == 'user' %}
+                    <a href="{% url 'user_dashboard'%}" class="back-btn">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </a>
+                {% else %}
+                    <a href="{% url 'admin_dashboard'%}" class="back-btn">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </a>
+                {% endif %}
+            </div>
+            <div>
+                {% if user.role|lower == 'admin' %}
+                <button class="btn-add" id="addMaterialsBtn">
+                    <i class="fas fa-plus"></i> Add Materials
+                </button>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="training-content" id="trainingContent">
+            <div class="course-details">
+                <img src="{% static training.image_url %}" alt="{{ training.title }}" class="course-image">
+                <h1 class="course-title">{{ training.title }}</h1>
+                <div class="course-instructor">
+                    <span>Instructor: {{ training.instructor_name}}</span>
+                </div>
+                <div class="course-meta">
+                    <span><i class="far fa-clock"></i> {{ training.duration }}</span>
+                    <span><i class="far fa-calendar-alt"></i> {{ training.start_date|date:"d M Y" }}</span>
+                </div>
+
+                <div class="course-tabs">
+                    <div class="tab active" data-tab="description">Description</div>
+                    <div class="tab" data-tab="benefits">Benefits</div>
+                    <div class="tab" data-tab="materials">Training Materials</div>
+                </div>
+
+                <!-- Tab Contents -->
+                <div id="description" class="tab-content active">
+                    <p>{{ training.description }}</p>
+                </div>
+
+                <div id="benefits" class="tab-content">
+                    <div class="benefits-grid">
+                        <div class="benefit-item">
+                            <div class="benefit-icon"><i class="fas fa-video"></i></div>
+                            <div>14 hours on-demand video</div>
+                        </div>
+                        <div class="benefit-item">
+                            <div class="benefit-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                            <div>Native teacher</div>
+                        </div>
+                        <div class="benefit-item">
+                            <div class="benefit-icon"><i class="fas fa-file-alt"></i></div>
+                            <div>100% free document</div>
+                        </div>
+                        <div class="benefit-item">
+                            <div class="benefit-icon"><i class="fas fa-infinity"></i></div>
+                            <div>Full lifetime access</div>
+                        </div>
+                        <div class="benefit-item">
+                            <div class="benefit-icon"><i class="fas fa-certificate"></i></div>
+                            <div>Certificate of Completion</div>
+                        </div>
+                        <div class="benefit-item">
+                            <div class="benefit-icon"><i class="fas fa-headset"></i></div>
+                            <div>24/7 support</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="materials" class="tab-content">
+                    <h3>Training Materials</h3>
+                    <!-- Materials List -->
+                    <div id="materials-list" class="materials-container">  
+                        {% if materials %}              
+                            <!-- Dynamic Materials from MongoDB -->
+                            {% for material in materials %}
+                                <div class="material-item">
+                                    <div class="material-info">
+                                        <span class="material-icon">
+                                            {% if material.type == 'video' %}🎬
+                                            {% elif material.type == 'file' %}📖
+                                            {% elif material.type == 'quiz' %}❓
+                                            {% else %}📄{% endif %}
+                                        </span>
+                                        <div>
+                                            <a href="{% if material.type == 'file' %}{% static material.file_url %}{% else %}{% static material.file_url %}{% endif %}" target="_blank" class="btn-view"><h4>{{ material.title }}</h4></a>
+                                            <div class="material-meta">
+                                                <span class="duration">{{ material.duration }} min</span>
+                                                {% if material.source %}
+                                                    <span class="source">📌 {{ material.source }}</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% if user.role|lower == 'user' %}
+                                        <button class="btn-complete {% if material.completed %}completed {% elif compstatus == 'completed'%}completed{% endif %}" title="Mark as completed" data-material-id="{{ material.material_id }}">
+                                            <i class="fas fa-check-double"></i>
+                                        </button>
+                                    {% else %}
+                                        <button class="btn-delete" title="Delete material" data-material-id="{{ material.material_id }}" data-training-id="{{ training_id }}" onclick="deleteMaterial(this)">
+                                                <i class="fas fa-trash"></i> 
+                                        </button>
+                                    {% endif %}
+                                </div>
+                                <!-- Add separator if not last item -->
+                                {% if not loop.last %}
+                                    <div class="material-separator"></div>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <p class="no-materials">No materials available for this training.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% if user.role|lower == 'user' and materials|length > 0 %}
+                <div class="completion-section">
+                        {% if status == 'enrolled' and compstatus != 'completed' %}
+                            <!-- Show Enrolled Status -->
+                            <button class="btn-secondary">Enrolled Training</button><br>
+                
+                            <!-- Show Progress and Complete Button -->
+                            <h3 class="completion-title">Course Completion</h3>
+                            <div class="progress-container">
+                                <div class="progress-bar" id="progressBar"></div>
+                            </div>
+                            <button class="complete-training-btn" id="completeTrainingBtn" disabled>
+                                Complete Training
+                            </button>
+                        
+                        {% elif compstatus != 'completed' %}
+                            <!-- Not enrolled yet, show enroll form -->
+                            <form action="{% url 'enroll_training' training_id %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="pb_number" value="{{ user.pb_number }}">
+                                <input type="hidden" name="training_id" value="{{ training_id }}">
+                                <input type="hidden" name="training_title" value="{{ training.title }}">
+                                <button type="submit" class="btn-add">Enroll Now</button>
+                            </form><br>
+                
+                        {% endif %}
+                
+                        {% if compstatus == 'completed' %}
+                            <!-- Already completed training -->
+                            <div class="completed-container">
+                                <p class="completed-text">
+                                    <span>Training Completed</span>
+                                    <span class="emoji">✅</span>
+                                </p>
+                                
+                                <div class="progress-container">
+                                    <div class="progress-bar" id="progressBar" style="width: 100%;"></div>
+                                </div>
+                                
+                                <div class="congrats-message">
+                                    <span class="emoji">🎉</span> Congratulations <b class="user-name">{{ user.name }}</b> on successfully completing the training <b>{{training.title}}</b>
+                                </div>
+                            </div>
+                        {% endif %}
+                </div>
+            {% endif %}
+        </div>
+
+        
+
+        <!-- Add Materials Form -->
+        <div id="add-materials-form" class="content-section" style="display: none;">
+            <div class="forms-wrapper"> 
+                <div class="form-container">
+                    <h2 class="form-title">Add New Material</h2>
+                    <form id="materialForm" action="{% url 'add_materials' %}" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="training_id" value="{{ training_id }}">
+
+                        <div class="form-group">
+                            <label for="material-title">Title</label>
+                            <input type="text" id="material-title" name="title" required class="form-control">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="material-type">Type</label>
+                            <select id="material-type" name="type" class="form-control" required>
+                                <option value="file">PDF File</option>
+                                <option value="video">Video</option>
+                                <option value="link">External Link</option>
+                            </select>
+                        </div>
+
+                        <div id="file-field" class="form-group">
+                            <label for="material-file">Upload File</label>
+                            <input type="file" id="material-file" name="file" class="form-control" accept=".pdf">
+                        </div>
+
+                        <div id="video-field" class="form-group" style="display: none;">
+                            <label for="material-video">Upload Video</label>
+                            <input type="file" id="material-video" name="video" class="form-control" accept=".mp4, .mov, .avi">
+                        </div>
+
+                        <div id="link-field" class="form-group" style="display: none;">
+                            <label for="material-link">External URL</label>
+                            <input type="url" id="material-link" name="link" class="form-control">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="material-duration">Duration (minutes)</label>
+                            <input type="number" id="material-duration" name="duration" class="form-control" min="1">
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Add Material</button>
+                            <button type="button" id="cancelMaterialBtn" class="btn-outline">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="form-container add-quiz">
+                    <h2 class="form-title">Conduct Quiz</h2>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="material_file" class="form-label">Upload File</label>
+                            <input type="file" class="form-control" id="material_file" name="material_file" accept=".pdf" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Generate questions</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <h2>Review Generated Questions</h2>
+            <div class="quiz-questions">
+                {% for question in questions %}
+                <div class="card mb-3 {% if question.status == 'approved' %}border-success{% endif %}">
+                    <div class="card-body">
+                        <h5 class="card-title">Question {{ forloop.counter }}</h5>
+                        <p class="card-text">{{ question.question }}</p>
+                        <ul class="list-group list-group-flush">
+                            {% for option in question.options %}
+                            <li class="list-group-item {% if option == question.correct_answer %}list-group-item-success{% endif %}">
+                                {{ option }}
+                                {% if option == question.correct_answer %}(Correct){% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% if question.status != 'approved' %}
+                        <a href="{% url 'approve_question' quiz_id=quiz_id question_index=forloop.counter0 %}" 
+                        class="btn btn-success mt-2">
+                            Approve Question
+                        </a>
+                        {% else %}
+                        <span class="badge bg-success mt-2">Approved</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        // Tab Switching Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remove active class from all tabs and contents
+                    document.querySelectorAll('.tab, .tab-content').forEach(el => {
+                        el.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+                    
+                    // Show corresponding content
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+            const addMaterialsBtn = document.getElementById('addMaterialsBtn');
+            const trainingContent = document.getElementById('trainingContent');
+            const addMaterialsForm = document.getElementById('add-materials-form');
+            const cancelMaterialBtn = document.getElementById('cancelMaterialBtn');
+            const materialType = document.getElementById('material-type');
+            
+
+            materialType.addEventListener('change', function() {
+                document.getElementById('file-field').style.display = 'none';
+                document.getElementById('video-field').style.display = 'none';
+                document.getElementById('link-field').style.display = 'none';
+                
+                if (this.value === 'file') {
+                    document.getElementById('file-field').style.display = 'block';
+                } else if (this.value === 'video') {
+                    document.getElementById('video-field').style.display = 'block';
+                } else if (this.value === 'link') {
+                    document.getElementById('link-field').style.display = 'block';
+                }
+            });
+            
+            // Toggle between training content and add materials form
+            if (addMaterialsBtn) {
+                addMaterialsBtn.addEventListener('click', function() {
+                    trainingContent.style.display = 'none';
+                    addMaterialsForm.style.display = 'block';
+                });
+            }
+            
+            if (cancelMaterialBtn) {
+                cancelMaterialBtn.addEventListener('click', function() {
+                    trainingContent.style.display = 'block';
+                    trainingContent.style.display = 'flex';
+                    addMaterialsForm.style.display = 'none';
+                });
+            }
+        });
+        function toggleMaterialsForm() {
+            const form = document.getElementById('add-materials-form');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function deleteMaterial(button) {
+            const materialId = button.getAttribute('data-material-id');
+            const trainingId = button.getAttribute('data-training-id');
+        
+            fetch("{% url 'delete_material' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    material_id: materialId,
+                    training_id: trainingId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Optionally reload or remove element from DOM
+                    location.reload();
+                } else {
+                    alert(data.message || 'Failed to delete material.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        // Progress Bar Functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const completeButtons = document.querySelectorAll('.btn-complete');
+            const progressBar = document.getElementById('progressBar');
+            const completeTrainingBtn = document.getElementById('completeTrainingBtn');
+            const totalMaterials = {{ materials|length }};
+            let completedCount = 0;
+            
+            function updateProgressBar() {
+                const percentage = (completedCount / totalMaterials) * 100;
+                progressBar.style.width = `${percentage}%`;
+
+                if (completedCount === totalMaterials) {
+                    completeTrainingBtn.disabled = false;
+                }
+            }
+        
+            completeButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    if (!button.classList.contains('completed')) {
+                        button.classList.add('completed');
+                        completedCount++;
+                        updateProgressBar();
+        
+                        // Optionally: Make an AJAX request to update completion status in backend
+                        const materialId = button.getAttribute('data-material-id');
+                        fetch(`/complete_material/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}' // if using CSRF protection
+                            },
+                            body: JSON.stringify({ completed: true })
+                        });
+                    }
+                });
+            });
+            completeTrainingBtn.addEventListener('click', () => {
+                const trainingId = "{{ training_id }}";
+                const pb_number = "{{ user.pb_number }}";
+                fetch("{% url 'complete_training' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ 
+                        training_id: trainingId,
+                        pb_number: pb_number,
+                        completed: true })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Training completed successfully!');
+                        location.reload();  // Reload the page to reflect changes
+                    } else {
+                        alert(data.message || 'Failed to complete training.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+        
+            updateProgressBar();  // Initial load
+        });
+
+    </script>
+</body>
+</html>

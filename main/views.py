@@ -18,6 +18,10 @@ import time
 from docx import Document
 from pptx import Presentation
 from uuid import uuid4
+import openpyxl
+from bson import ObjectId
+import calendar
+import google.generativeai as genai
 
 # MongoDB connection
 client = MongoClient('mongodb://localhost:27017/')
@@ -26,12 +30,20 @@ users_collection = db['users']
 trainings_collection = db['trainings']
 llm_collection = db['document']
 collection = db['eguru-llm-index']
+enrolled_courses_collection = db['enrolled_courses']
+completed_trainings = db['completed_trainings']
+materials_collection = db['materials']
+quizzes_collection = db['quizzes']
+questions_collection = db['questions']
 
 # Constants for chunking
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
 
 embedder = SentenceTransformer('all-MiniLM-L6-v2')
+genai.configure(api_key='AIzaSyDpV0h2Iv6c9j446bYIzefZYBr0lWYfHZY')
+quiz_model = genai.GenerativeModel(model_name="models/gemini-1.5-flash")
+
 
 def signin(request):
     if request.method == 'POST':
@@ -42,8 +54,6 @@ def signin(request):
         if user_data and check_password(password, user_data.get('password')):
             request.session['pb_number'] = pb_number
             request.session['role'] = user_data.get('role').lower()
-
-            print(f"Session set: pb_number={pb_number}, role={user_data.get('role').lower()}")
 
             if user_data.get('role').lower() == 'admin':
                 return redirect('admin_dashboard')
@@ -77,10 +87,10 @@ def signup(request):
                 "role": role,
                 "division": division,
                 "department": department,
-                "designation": designation
+                "designation": designation,
+                "date_joined": datetime.now()
             }
             result = users_collection.insert_one(user_data)
-            print(f"User Inserted with ID: {result.inserted_id}")
             messages.success(request, 'Account created successfully. Please sign in.')
             return redirect('signin')
 
@@ -94,18 +104,11 @@ def signout(request):
     
     if 'role' in request.session:
         del request.session['role']
-    
-    # Then clear all Django authentication
     logout(request)
     
-    # Flush the entire session to ensure everything is cleared
     request.session.flush()
     
-    # Optional: Reset the session cookie
     request.session.clear_expired()
-    
-    # Debug output to confirm session clearing
-    print("Session cleared during logout")
     
     messages.success(request, 'You have been logged out.')
     return redirect('signin')
@@ -243,20 +246,122 @@ def manage_llm(request):
 def admin_dashboard(request):
     # The middleware already verified that this is a valid admin user
     pb_number = request.session.get('pb_number')
+    
     user_data = users_collection.find_one({"pb_number": pb_number})
     all_users = list(users_collection.find({}))
     all_trainings = list(trainings_collection.find({}))
+    enrollment = list(enrolled_courses_collection.find({}))
+    completed = list(completed_trainings.find({}))    
+    trainings_with_id = [
+        {**training, 'training_id': str(training['_id'])} for training in all_trainings
+    ]
+    enroll_with_id = [
+        {**enroll, 'training_id': str(enroll['training_id'])} for enroll in enrollment
+    ]
     uploaded_documents = list(llm_collection.find({}))
-    for doc in uploaded_documents:
-        doc["id"] = str(doc["_id"])
-    return render(request, 'admin_dashboard.html', {'all_users': all_users, 'admin': user_data, 'all_trainings': all_trainings, "uploaded_documents": uploaded_documents})
+    
+
+    context ={
+        'all_users': all_users,
+        'admin': user_data,
+        'trainings': trainings_with_id,
+        'uploaded_documents': uploaded_documents,
+        'enrollment': enroll_with_id,
+        'completed': completed,
+        # 'month_labels': [calendar.month_abbr[int(m[5:])] for m in months],
+        # 'month_enroll': monthly_enroll,
+        # 'month_complete': monthly_complete,
+        # 'year_labels': years,
+        # 'year_enroll': yearly_enroll,
+        # 'year_complete': yearly_complete,
+    }
+    return render(request, 'admin_dashboard.html', context)
 
 def user_dashboard(request):
     pb_number = request.session.get('pb_number')
     user_data = users_collection.find_one({"pb_number": pb_number})
     all_trainings = list(trainings_collection.find({}))
     uploaded_documents = list(llm_collection.find({}))
-    return render(request, 'user_dashboard.html', {'user': user_data, 'all_trainings': all_trainings, "uploaded_documents": uploaded_documents})
+    trainings_with_id = [
+        {**training, 'training_id': str(training['_id'])} for training in all_trainings
+    ]
+    enrollment = list(enrolled_courses_collection.find({"pb_number": pb_number}))
+    completed = list(completed_trainings.find({"pb_number": pb_number}))    
+    enroll_with_id = [
+        {**enroll, 'training_id': str(enroll['training_id'])} for enroll in enrollment
+    ]
+    completed_with_id = [
+        {**comp, 'training_id': str(comp['training_id'])} for comp in completed
+    ]
+    # ---------------- Month-wise Aggregation ----------------
+    enrollments_month = list(enrolled_courses_collection.aggregate([
+        {"$match": {"status": "enrolled",
+                    "pb_number": pb_number}},
+        {"$group": {
+            "_id": {"$dateToString": {"format": "%Y-%m", "date": "$enrollment_date"}},
+            "count": {"$sum": 1}
+        }},
+        {"$sort": {"_id": 1}}
+    ]))
+
+    completions_month = list(completed_trainings.aggregate([
+        {"$match": {"status": "completed",
+                    "pb_number": pb_number}},
+        {"$group": {
+            "_id": {"$dateToString": {"format": "%Y-%m", "date": "$completion_date"}},
+            "count": {"$sum": 1}
+        }},
+        {"$sort": {"_id": 1}}
+    ]))
+
+    # ---------------- Year-wise Aggregation ----------------
+    enrollments_year = list(enrolled_courses_collection.aggregate([
+        {"$match": {"status": "enrolled",
+                    "pb_number": pb_number}},
+        {"$group": {
+            "_id": {"$dateToString": {"format": "%Y", "date": "$enrollment_date"}},
+            "count": {"$sum": 1}
+        }},
+        {"$sort": {"_id": 1}}
+    ]))
+
+    completions_year = list(completed_trainings.aggregate([
+        {"$match": {"status": "completed",
+                    "pb_number": pb_number}},
+        {"$group": {
+            "_id": {"$dateToString": {"format": "%Y", "date": "$completion_date"}},
+            "count": {"$sum": 1}
+        }},
+        {"$sort": {"_id": 1}}
+    ]))
+    months = [f"2025-{str(m).zfill(2)}" for m in range(1, 13)]
+    years = sorted(list(set([entry['_id'] for entry in enrollments_year + completions_year])))
+
+    # Convert to dict for lookup
+    em_dict = {e['_id']: e['count'] for e in enrollments_month}
+    cm_dict = {c['_id']: c['count'] for c in completions_month}
+    ey_dict = {e['_id']: e['count'] for e in enrollments_year}
+    cy_dict = {c['_id']: c['count'] for c in completions_year}
+
+    # Fill zero where missing
+    monthly_enroll = [em_dict.get(month, 0) for month in months]
+    monthly_complete = [cm_dict.get(month, 0) for month in months]
+    yearly_enroll = [ey_dict.get(year, 0) for year in years]
+    yearly_complete = [cy_dict.get(year, 0) for year in years]
+    context = {
+        'user': user_data,
+        'trainings': trainings_with_id,
+        'uploaded_documents': uploaded_documents,
+        'enrollment': enroll_with_id,
+        'completed': completed_with_id,
+        'month_labels': [m[5:] for m in months],  # ['01', '02', ..., '12']
+        'month_enroll': monthly_enroll,
+        'month_complete': monthly_complete,
+        'year_labels': years,
+        'year_enroll': yearly_enroll,
+        'year_complete': yearly_complete,
+    }
+    return render(request, 'user_dashboard.html', context)
 
 def create_user(request):
     if request.method == 'POST':
@@ -281,13 +386,50 @@ def create_user(request):
                 "role": role,
                 "division": division,
                 "department": department,
-                "designation": designation
+                "designation": designation,
+                "date_joined": datetime.now()
             }
             users_collection.insert_one(user_data)
             messages.success(request, 'User created successfully.')        
         return redirect('admin_dashboard')
     return render(request, 'admin_dashboard.html')
 
+def import_users_excel(request):
+    if request.method == 'POST' and request.FILES.get('excel_file'):
+        excel_file = request.FILES['excel_file']
+        wb = openpyxl.load_workbook(excel_file)
+        sheet = wb.active
+
+        for i, row in enumerate(sheet.iter_rows(min_row=2, values_only=True)):  
+            try:
+                pb_number, password, name, gender, role, division, department, designation = row
+                hashed_password = make_password(str(password))
+
+                user_data = {
+                    "pb_number": str(pb_number),
+                    "password": hashed_password,
+                    "name": name,
+                    "gender": gender,
+                    "role": role,
+                    "division": division,
+                    "department": department,
+                    "designation": designation,
+                    "date_joined": datetime.now()
+                }
+
+                existing = users_collection.find_one({"pb_number": str(pb_number)})
+                if not existing:
+                    users_collection.insert_one(user_data)
+                else:
+                    print(f"Skipping duplicate PB: {pb_number}")
+            except Exception as e:
+                print(f"Row {i+2} failed: {e}")
+
+        messages.success(request, "Users imported successfully!")
+        return redirect('admin_dashboard')  # or wherever your dashboard is
+
+    messages.error(request, "No file uploaded.")
+    return redirect('admin_dashboard')
 
 def edit_user(request, user_id):
     # Check if authenticated user is admin
@@ -302,17 +444,20 @@ def edit_user(request, user_id):
     messages.info(request, 'Edit user functionality will be implemented soon.')
     return redirect('admin_dashboard')
 
-def delete_user(request, user_id):
-    # Check if authenticated user is admin
-    pb_number = request.session.get('pb_number')
-    user_data = users_collection.find_one({"pb_number": pb_number})
-    
-    if not user_data or user_data.get('role', '').lower() != 'admin':
-        messages.error(request, 'Access denied. Admin access only.')
-        return redirect('signin')
-    
-    # Implementation for deleting users
-    messages.info(request, 'Delete user functionality will be implemented soon.')
+def delete_user(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        pb_number = data.get('pb_number')
+
+        if not pb_number:
+            return JsonResponse({'error': 'PB number not provided'}, status=400)
+
+        result = users_collection.delete_one({'pb_number': pb_number})
+
+        if result.deleted_count == 1:
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'message': 'User not found'})
     return redirect('admin_dashboard')
 
 
@@ -443,3 +588,227 @@ def index_single_document(file_path):
                 "text": chunk,
                 "embedding": embedding
             })
+
+def enroll_training(request, training_id):
+    if request.method == 'POST':
+        pb_number = request.POST.get('pb_number') 
+        training_id = request.POST.get('training_id')
+        
+        # Check if the training exists
+        training = trainings_collection.find_one({"_id": ObjectId(training_id)})
+        
+        if not training:
+            messages.error(request, 'Training not found.')
+            return redirect('user_dashboard')
+        
+        # Check if the user is already enrolled in the training
+        existing_enrollment = enrolled_courses_collection.find_one({
+            "pb_number": pb_number,
+            "training_id": ObjectId(training_id)
+        })
+
+        if existing_enrollment:
+            messages.info(request, 'You are already enrolled in this training.')
+            return redirect('user_dashboard')
+
+        # Enroll the user in the course
+        enrolled_courses_collection.insert_one({
+            "pb_number": pb_number,
+            "training_id": ObjectId(training_id),
+            "status": "enrolled",
+            "enrollment_date": datetime.now()
+        })
+
+        # After successful enrollment, redirect the user to the dashboard
+        messages.success(request, 'You have successfully enrolled in the training.')
+        return redirect('user_dashboard')
+
+def complete_training(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        pb_number = data.get('pb_number')
+        training_id = data.get('training_id')
+
+        training = trainings_collection.find_one({"_id": ObjectId(training_id)})
+
+        # Check if already completed
+        completed_course = completed_trainings.find_one({
+            "pb_number": pb_number,
+            "training_id": ObjectId(training_id)
+        })
+
+        if completed_course:
+            return JsonResponse({
+                "success": False,
+                "message": "You have already completed this training."
+            })
+
+        # Insert completion record
+        completed_trainings.insert_one({
+            "pb_number": pb_number,
+            "training_id": ObjectId(training_id),
+            "status": "completed",
+            "completion_date": datetime.now()
+        })
+
+        return JsonResponse({
+            "success": True,
+            "message": "Training marked as completed."
+        })
+
+def training_details(request, title):
+    if request.method == 'POST':
+        pb_number = request.POST.get('pb_number')
+        training_id = request.POST.get('training_id')
+        user_data = users_collection.find_one({"pb_number": str(pb_number)})
+        training = trainings_collection.find_one({"_id": ObjectId(training_id)})
+        enrollment = enrolled_courses_collection.find_one({
+        "pb_number": pb_number,
+        "training_id": ObjectId(training_id)
+        })
+        status = enrollment.get('status') if enrollment else None
+        materials = list(materials_collection.find({
+            "training_id": ObjectId(training_id)
+        }))
+        materials_with_id = [
+        {**material, 'material_id': str(material['_id'])} for material in materials
+    ]
+        completed = completed_trainings.find_one({
+            "pb_number": pb_number,
+            "training_id": ObjectId(training_id)
+        })
+        compstatus = completed.get('status') if completed else None
+        context = {
+            'training': training,
+            'user': user_data,
+            'training_id': training_id,
+            'pb_number': pb_number,
+            'status': status,
+            'materials': materials_with_id,
+            'compstatus': compstatus,
+            'enrollment': enrollment,
+            'completed': completed
+        }
+        return render(request, 'training_details.html', context)
+
+def add_materials(request):
+    if request.method == 'POST':
+        training_id = request.POST.get('training_id')
+        title = request.POST.get('title')
+        material_type = request.POST.get('type')
+        duration = request.POST.get('duration')
+        
+        # Validate required fields
+        if not title or not material_type:
+            messages.error(request, 'Title and material type are required.')
+            return redirect('admin_dashboard')
+        
+        # Base directory for all materials
+        material_directory = os.path.join('main', 'static', 'training_materials')
+        os.makedirs(material_directory, exist_ok=True)
+        
+        material_data = {
+            'title': title,
+            'type': material_type,
+            'training_id': ObjectId(training_id),
+            'duration': duration,
+            'upload_date': datetime.now(),
+            'uploaded_by': request.session.get('pb_number'),
+            'status': 'active'
+        }
+        
+        try:
+            # Handle different material types
+            if material_type == 'file':
+                file = request.FILES.get('file')
+                if not file:
+                    messages.error(request, 'Please upload a PDF file.')
+                    return redirect('admin_dashboard')
+                
+                # Generate unique filename
+                unique_filename = f"{file.name}"
+                file_path = os.path.join(material_directory, unique_filename)
+                
+                with open(file_path, 'wb+') as destination:
+                    for chunk in file.chunks():
+                        destination.write(chunk)
+                
+                material_data['file_url'] = f"training_materials\{unique_filename}"
+            
+            elif material_type == 'video':
+                video = request.FILES.get('video')
+                if not video:
+                    messages.error(request, 'Please upload a video file.')
+                    return redirect('admin_dashboard')
+                
+                unique_filename = f"{video.name}"
+                video_path = os.path.join(material_directory, unique_filename)
+                
+                with open(video_path, 'wb+') as destination:
+                    for chunk in video.chunks():
+                        destination.write(chunk)
+                
+                material_data['file_url'] = f"training_materials\{unique_filename}"
+            
+            elif material_type == 'link':
+                link = request.POST.get('link')
+                if not link:
+                    messages.error(request, 'Please provide a valid URL.')
+                    return redirect('admin_dashboard')
+                material_data['external_url'] = link
+            
+            else:
+                messages.error(request, 'Invalid material type selected.')
+                return redirect('admin_dashboard')
+            
+            # Insert into MongoDB
+            materials_collection.insert_one(material_data)
+            
+            # Also update the training document to reference this material
+            trainings_collection.update_one(
+                {"_id": ObjectId(training_id)},
+                {"$push": {"materials": material_data['_id']}}  # Assuming you want to store references
+            )
+            
+            messages.success(request, 'Material added successfully.')
+        
+        except Exception as e:
+            messages.error(request, f'Error adding material: {str(e)}')
+        
+        return redirect('admin_dashboard')
+    
+    return render(request, 'training_details.html')
+
+def delete_material(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        training_id = data.get('training_id')
+        material_id = data.get('material_id')
+
+        if not material_id:
+            return JsonResponse({'error': 'Material ID not provided'}, status=400)
+
+        result = materials_collection.delete_one({'_id': ObjectId(material_id)})
+
+        if result.deleted_count == 1:
+            trainings_collection.update_one(
+                {'_id': ObjectId(training_id)},
+                {'$pull': {'materials': ObjectId(material_id)}}
+            )
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'message': 'Material not found'})
+    return redirect('training_details')
+
+def delete_training(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        training_id = data.get('training_id')
+
+        if not training_id:
+            return JsonResponse({'error': 'Material ID not provided'}, status=400)
+
+        result = trainings_collection.delete_one({'_id': ObjectId(training_id)})
+
+    return redirect('admin_dashboard')
+

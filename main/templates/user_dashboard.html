@@ -39,12 +39,14 @@
             background-color: var(--bg-color);
             color: var(--text-dark);
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         /* Layout */
         .dashboard-container {
             display: flex;
             min-height: 100vh;
+            position: relative;
         }
 
         /* Sidebar */
@@ -55,8 +57,9 @@
             padding: 2rem 1rem;
             position: fixed;
             height: 100vh;
-            z-index: 100;
+            z-index: 1000;
             transition: all 0.3s ease;
+            overflow-y: auto;
         }
 
         .sidebar-header {
@@ -68,6 +71,8 @@
         .logo {
             width: 180px;
             margin-bottom: 1rem;
+            max-width: 100%;
+            height: auto;
         }
 
         .nav-menu {
@@ -87,6 +92,7 @@
             color: var(--text-dark);
             text-decoration: none;
             transition: all 0.3s ease;
+            white-space: nowrap;
         }
 
         .nav-link:hover, .nav-link.active {
@@ -100,6 +106,8 @@
             width: 24px;
             text-align: center;
         }
+
+        #dashboard { display: block; }
 
         .chat-btn {
             margin-top: 2rem;
@@ -132,6 +140,7 @@
             margin-left: 280px;
             padding: 2rem;
             transition: all 0.3s ease;
+            min-width: 0; /* Prevent flex overflow */
         }
 
         /* Top Bar */
@@ -142,12 +151,33 @@
             margin-bottom: 2rem;
             padding-bottom: 1rem;
             border-bottom: 1px solid rgba(0,0,0,0.05);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        /* Hamburger Menu */
+        .hamburger {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1100;
+            font-size: 1.5rem;
+            color: var(--text-dark);
+            background: var(--light);
+            padding: 0.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            cursor: pointer;
+            border: none;
         }
 
         .page-title {
             font-size: 1.75rem;
             color: var(--primary);
             font-weight: 700;
+            padding: 0.65rem 1.5rem;
+            margin-right: auto;
         }
 
         .user-profile {
@@ -155,6 +185,8 @@
             align-items: center;
             cursor: pointer;
             position: relative;
+            margin-left: auto;
+            margin-right: 20px;
         }
 
         .user-avatar {
@@ -168,15 +200,18 @@
             justify-content: center;
             font-weight: 600;
             margin-right: 12px;
+            flex-shrink: 0;
         }
 
         .user-name {
             font-weight: 600;
+            white-space: nowrap;
         }
 
         .user-role {
             font-size: 0.8rem;
             color: var(--text-light);
+            white-space: nowrap;
         }
 
         .profile-dropdown {
@@ -210,11 +245,14 @@
             width: 100%;
             padding: 0.5rem;
             background: var(--light);
+            color: var(--primary);
             border: none;
             border-radius: 6px;
             margin-top: 1rem;
             cursor: pointer;
             transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
         }
 
         .logout-btn:hover {
@@ -365,6 +403,8 @@
             font-size: 0.8rem;
             color: var(--text-light);
             margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
 
         .training-instructor {
@@ -383,10 +423,44 @@
         .training-actions {
             display: flex;
             gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 1rem;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(110,72,170,0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: rgba(110,72,170,0.1);
         }
 
         .btn-details {
             flex: 1;
+            min-width: 100px;
             background: white;
             border: 1px solid var(--primary);
             color: var(--primary);
@@ -403,6 +477,7 @@
 
         .btn-enroll {
             flex: 1;
+            min-width: 100px;
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             color: white;
             border: none;
@@ -428,12 +503,14 @@
             padding: 1rem;
             border-radius: 12px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .search-box {
             position: relative;
             flex: 1;
-            max-width: 400px;
+            min-width: 200px;
             margin-right: 1rem;
         }
 
@@ -464,6 +541,7 @@
             display: flex;
             align-items: center;
             gap: 0.75rem;
+            flex-wrap: wrap;
         }
 
         .form-select {
@@ -474,12 +552,109 @@
             background: white;
             cursor: pointer;
             transition: all 0.3s ease;
+            min-width: 150px;
         }
 
         .form-select:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(110,72,170,0.1);
+        }
+
+        /* Form Styles */
+        .forms-wrapper {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;    
+            flex-wrap: wrap;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .form-container {
+            max-width: 600px;
+            flex: 1;
+            margin: 2rem auto;
+            min-width: 0;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            padding: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-container.import-form {
+            flex: 1; 
+            min-width: 0;
+            margin: 2rem auto;
+            padding: 1.5rem; 
+            max-width: 600px;
+            max-height: 260px;
+        }
+        
+        /* Make the import form title smaller */
+        .form-container.import-form .form-title {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(110,72,170,0.15);
+        }
+
+        .form-title {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .form-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-bottom: 1.25rem;
+            background-color: var(--card-bg);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(110,72,170,0.1);
+        }
+
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236e48aa' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 16px 12px;
         }
 
         /* Analytics Chart */
@@ -489,6 +664,7 @@
             padding: 1.5rem;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
             margin-bottom: 2rem;
+            overflow-x: auto;
         }
 
         .chart-header {
@@ -496,6 +672,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .chart-title {
@@ -507,6 +685,7 @@
         .chart-controls {
             display: flex;
             gap: 0.5rem;
+            flex-wrap: wrap;
         }
 
         .chart-btn {
@@ -540,17 +719,24 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
         }
 
+        .data-table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+        }
+
         .data-table th {
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             color: white;
             padding: 1rem;
             text-align: left;
             font-weight: 600;
+            white-space: nowrap;
         }
 
         .data-table td {
             padding: 1rem;
             border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
         }
 
         .data-table tr:last-child td {
@@ -561,9 +747,20 @@
             background-color: rgba(110,72,170,0.05);
         }
 
+        .btn-view {
+            color: black;
+            font-family: 'Roboto', sans-serif;
+            font-size: 0.85rem;
+            text-decoration: none;
+            border-bottom: 1px solid var(--border-color);
+            border-bottom: none;
+            background-color: rgba(110,72,170,0.05);
+        }
+
         .table-actions {
             display: flex;
             gap: 0.5rem;
+            flex-wrap: wrap;
         }
 
         .action-btn {
@@ -571,6 +768,8 @@
             border-radius: 6px;
             font-size: 0.85rem;
             transition: all 0.2s ease;
+            text-decoration: none;
+            white-space: nowrap;
         }
 
         .btn-sm {
@@ -589,6 +788,7 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             background-color: var(--chat-bg);
+            width: 100%;
         }
 
         .chat-header {
@@ -603,10 +803,10 @@
         .chat-header h2 {
             margin: 0;
             font-weight: 600;
+            font-size: 1.25rem;
         }
 
         .chat-messages {
-            margin-right: 20px;
             flex: 1;
             padding: 20px;
             overflow-y: auto;
@@ -635,6 +835,7 @@
 
         .message-content {
             padding: 12px 16px;
+            word-wrap: break-word;
         }
 
         .message-info {
@@ -660,6 +861,7 @@
             outline: none;
             font-size: 1rem;
             transition: border 0.3s;
+            min-width: 50px;
         }
 
         #messageInput:focus {
@@ -676,6 +878,7 @@
             cursor: pointer;
             font-size: 1rem;
             transition: transform 0.2s, opacity 0.2s;
+            min-width: 80px;
         }
 
         #sendButton:hover {
@@ -747,33 +950,11 @@
             font-size: 0.9rem;
             cursor: pointer;
             transition: background-color 0.2s;
+            white-space: nowrap;
         }
 
         .suggestion-btn:hover {
             background-color: #e0e8ff;
-        }
-
-        /* Floating Chat Button */
-        .floating-chat-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 5px 20px rgba(110,72,170,0.3);
-            cursor: pointer;
-            z-index: 99;
-            transition: all 0.3s ease;
-        }
-
-        .floating-chat-btn:hover {
-            transform: scale(1.1);
         }
 
         /* Content Sections */
@@ -787,8 +968,19 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Responsive Styles */
-        @media (max-width: 1200px) {
+        /* Responsive Breakpoints */
+        /* Large devices (desktops, 1200px and up) */
+        @media (min-width: 1200px) {
+            .sidebar {
+                width: 280px;
+            }
+            .main-content {
+                margin-left: 280px;
+            }
+        }
+
+        /* Medium devices (tablets, 992px to 1199px) */
+        @media (max-width: 1199px) {
             .sidebar {
                 width: 250px;
                 padding: 1.5rem 1rem;
@@ -798,7 +990,8 @@
             }
         }
 
-        @media (max-width: 992px) {
+        /* Small devices (landscape phones, 768px to 991px) */
+        @media (max-width: 991px) {
             .sidebar {
                 transform: translateX(-100%);
                 position: fixed;
@@ -811,9 +1004,19 @@
                 margin-left: 0;
                 width: 100%;
             }
+            .hamburger {
+                display: block;
+            }
+            .page-title {
+                padding-left: 3.5rem;
+            }
+            .training-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
         }
 
-        @media (max-width: 768px) {
+        /* Extra small devices (portrait phones, 576px to 767px) */
+        @media (max-width: 767px) {
             .filter-bar {
                 flex-direction: column;
                 align-items: stretch;
@@ -829,14 +1032,89 @@
             .stats-grid {
                 grid-template-columns: 1fr 1fr;
             }
+            .training-grid {
+                grid-template-columns: 1fr;
+            }
+            .chart-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .chart-controls {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            .form-container {
+                padding: 1.5rem;
+            }
+            .btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
         }
 
-        @media (max-width: 576px) {
+        /* Extra extra small devices (phones, less than 576px) */
+        @media (max-width: 575px) {
             .stats-grid {
                 grid-template-columns: 1fr;
             }
-            .training-grid {
-                grid-template-columns: 1fr;
+            .main-content {
+                padding: 1.5rem 1rem;
+            }
+            .page-title {
+                font-size: 1.5rem;
+                padding: 0.5rem 1rem 0.5rem 3.5rem;
+            }
+            .user-profile {
+
+                margin-right: 10px;
+            }
+            .profile-dropdown {
+                width: 200px;
+                right: -50px;
+            }
+            .form-container {
+                padding: 1rem;
+            }
+            .form-title {
+                font-size: 1.25rem;
+                margin-bottom: 1.5rem;
+            }
+            .chat-header h2 {
+                font-size: 1rem;
+            }
+            .message {
+                max-width: 90%;
+            }
+            .suggestion-btn {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Very small devices (phones, less than 400px) */
+        @media (max-width: 399px) {
+            .training-actions {
+                flex-direction: column;
+            }
+            .btn-details, .btn-enroll {
+                width: 100%;
+            }
+            .table-actions {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .action-btn {
+                width: 100%;
+                text-align: center;
+            }
+            .chat-header {
+                padding: 10px 15px;
+            }
+            #messageInput {
+                padding: 10px 12px;
+            }
+            #sendButton {
+                padding: 0 15px;
             }
         }
     </style>
@@ -844,7 +1122,11 @@
 <body>
     <div class="dashboard-container">
         <!-- Sidebar -->
-        <div class="sidebar">
+        <!-- Hamburger Icon for Mobile -->
+        <div class="hamburger" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <img src="/static/eguru.webp" alt="eGuru Logo" class="logo" />
             </div>
@@ -861,14 +1143,15 @@
         <div class="main-content">
             <!-- Top Bar -->
             <div class="top-bar">
-                <h1 class="page-title">User Dashboard</h1>
-                <div class="user-profile" onclick="toggleProfileDropdown()">
+                <h1 class="page-title">Hello {{user.name}}</h1>
+                <div class="user-profile" id="profileToggle">
                     <div class="user-avatar">{{ user.name|first|upper }}</div>
                     <div>
                         <div class="user-name">{{ user.name }}</div>
                         <div class="user-role">{{ user.role }}</div>
                     </div>
-                    <div class="profile-dropdown">
+                    <i class="fas fa-chevron-down ml-2" style="font-size: 0.8rem;"></i>
+                    <div class="profile-dropdown" id="profileDropdown">
                         <div class="profile-info">
                             <p><strong>PB Number:</strong> {{ user.pb_number }}</p>
                             <p><strong>Name:</strong> {{ user.name }}</p>
@@ -878,7 +1161,9 @@
                             <p><strong>Department:</strong> {{ user.department|default:'N/A' }}</p>
                             <p><strong>Designation:</strong> {{ user.designation|default:'N/A' }}</p>
                         </div>
-                        <a href="{% url 'signout' %}" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        <a href="{% url 'signout' %}" class="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
                     </div>
                 </div>
             </div>
@@ -891,29 +1176,20 @@
                 </div>
                 
                 <div class="stats-grid">
-                    <div class="stat-card">
+                    {% comment %} <div class="stat-card">
                         <div class="stat-icon"><i class="fas fa-star"></i></div>
                         <h3 class="stat-title">Interested Courses</h3>
                         <div class="stat-value">{{ interested_courses }}</div>
-                        <div class="stat-change">
-                            <i class="fas fa-arrow-up"></i> 12% from last month
-                        </div>
-                    </div>
+                    </div> {% endcomment %}
                     <div class="stat-card">
                         <div class="stat-icon"><i class="fas fa-book"></i></div>
                         <h3 class="stat-title">Enrolled Courses</h3>
-                        <div class="stat-value">{{ enrolled_courses }}</div>
-                        <div class="stat-change">
-                            <i class="fas fa-arrow-up"></i> 5% from last month
-                        </div>
+                        <div class="stat-value">{{ enrollment|length }}</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
                         <h3 class="stat-title">Completed Courses</h3>
-                        <div class="stat-value">{{ completed_courses }}</div>
-                        <div class="stat-change">
-                            <i class="fas fa-arrow-up"></i> 8% from last month
-                        </div>
+                        <div class="stat-value">{{ completed|length }}</div>
                     </div>
                 </div>
 
@@ -921,12 +1197,54 @@
                     <div class="chart-header">
                         <h3 class="chart-title">Training Progress</h3>
                         <div class="chart-controls">
-                            <button class="chart-btn active">Monthly</button>
-                            <button class="chart-btn">Quarterly</button>
-                            <button class="chart-btn">Yearly</button>
+                            <button class="chart-btn active" data-chart-type="monthly">Monthly</button>
+                            <button class="chart-btn" data-chart-type="quarterly">Quarterly</button>
+                            <button class="chart-btn" data-chart-type="yearly">Yearly</button>
                         </div>
                     </div>
                     <canvas id="progressChart"></canvas>
+                </div>
+
+                <div class="course-enroll mb-4">
+                    <h2><b>Enrolled Trainings<b></h2>
+                </div>
+                <div class="training-grid" id="trainingsContainer">
+                    {% for training in trainings %}
+                        {% for enroll in enrollment %}
+                            {% if enroll.training_id == training.training_id and enroll.status == 'enrolled' %}
+                                <div class="training-card" data-category="{{ training.category }}" data-status="{{ training.status }}">
+                                    <div class="position-relative">
+                                        <img src="{% static training.image_url %}" class="training-img" alt="{{ training.title }}">
+                                        
+                                        <span class="training-badge badge-{{ enroll.status }}">
+                                            {{ enroll.status|title }}
+                                        </span>
+                                    </div>
+                                    <div class="training-body">
+                                        <h5 class="training-title">{{ training.title }}</h5>
+                                        <span class="training-category">{{ training.category|title }}</span>
+                                        <p class="training-desc">{{ training.description }}</p>
+                                        <div class="training-instructor">
+                                            <i class="fas fa-user-tie"></i> {{ training.instructor_name }}
+                                        </div>
+                                        <div class="training-meta">
+                                            <span>{{ training.duration }}</span>
+                                            <span>{{ training.start_date|date:"d M Y" }} - {{ training.end_date|date:"d M Y" }}</span>
+                                            
+                                        </div>
+                                        <div class="training-actions">
+                                            <form action="{% url 'training_details' training.title%}" method="post">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="pb_number" value="{{ user.pb_number }}">
+                                                <input type="hidden" name="training_id" value="{{ training.training_id }}">
+                                                <button type="submit" class="btn btn-outline">View Details</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
                 </div>
             </div>
 
@@ -957,9 +1275,9 @@
                             <option value="aerodynamics">Aerodynamics</option>
                             <option value="aviation">Aviation</option>
                             <option value="personality-development">Personality Development</option>
-                            <option value="soft-skills">Soft Skills</option>
+                            <option value="technical">Technical</option>
                             <option value="corporate">Corporate</option>
-                            <option value="industry">Industry Knowledge</option>
+                            <option value="management">Management</option>
                         </select>
                         <select class="form-select" id="statusFilter" onchange="filterTrainings()">
                             <option value="all">All Status</option>
@@ -969,12 +1287,13 @@
                         </select>
                     </div>
                 </div>
-              
+
                 <div class="training-grid" id="trainingsContainer">
-                    {% for training in all_trainings %}
+                    {% for training in trainings %}
                     <div class="training-card" data-category="{{ training.category }}" data-status="{{ training.status }}">
                         <div class="position-relative">
                             <img src="{% static training.image_url %}" class="training-img" alt="{{ training.title }}">
+                            
                             <span class="training-badge badge-{{ training.status }}">
                                 {{ training.status|title }}
                             </span>
@@ -988,25 +1307,33 @@
                             </div>
                             <div class="training-meta">
                                 <span>{{ training.duration }}</span>
-                                <span>{{ training.start_date|date:"d M Y" }}</span>
+                                <span>{{ training.start_date|date:"d M Y" }} - {{ training.end_date|date:"d M Y" }}</span>
+                                
                             </div>
                             <div class="training-actions">
-                                <button class="btn-details">Details</button>
-                                <button class="btn-enroll">Enroll</button>
+                                <form action="{% url 'training_details' training.title%}" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="pb_number" value="{{ user.pb_number }}">
+                                    <input type="hidden" name="training_id" value="{{ training.training_id }}">
+                                    <button type="submit" class="btn btn-outline">View Details</button>
+                                </form>
                             </div>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
             </div>
-
+            
             <!-- Uploaded LLM Documents Section -->
             <div id="uploaded-llm-docs" class="content-section">
                 <div class="filter-bar">
                     <div class="search-box">
                         <i class="fas fa-search"></i>
-                        <input type="text" class="search-input" placeholder="Search documents..." id="llmSearchInput">
+                        <input type="text" class="search-input" placeholder="Search documents..." id="llmSearchInput" onkeyup="filterLLMDocs()">
                     </div>
+                    <button class="btn btn-primary" onclick="showSection('manage-llms')">
+                        <i class="fas fa-upload"></i> Upload New Documents
+                    </button>
                 </div>
                 
                 <div class="table-responsive">
@@ -1022,7 +1349,7 @@
                         <tbody id="llmTableBody">
                             {% for doc in uploaded_documents %}
                             <tr>
-                                <td>{{ doc.name }}</td>
+                                <td><a href="{% if doc.type == 'PDF' or doc.type == 'PPT' or doc.type == 'PPTX' or doc.type == 'DOC' %}{% static doc.file_url %}{% else %}#{% endif %}" target="_blank" class="btn-view"><h4>{{ doc.name }}</h4></a></td>
                                 <td>
                                     <span class="badge" style="background: rgba(110,72,170,0.1); color: var(--primary); padding: 0.25rem 0.5rem; border-radius: 20px; font-size: 0.75rem;">
                                         {{ doc.type }}
@@ -1033,9 +1360,6 @@
                                     <div class="table-actions">
                                         <a href= "{% static doc.file_url %}" download="{{ doc.name }}.pdf" class="action-btn" style="background: rgba(40,167,69,0.1); color: var(--success);">
                                             <i class="fas fa-download"></i> Download</a>
-                                        {% comment %} <button class="action-btn" style="background: rgba(255,101,132,0.1); color: var(--accent);">
-                                            <i class="fas fa-trash"></i>
-                                        </button> {% endcomment %}
                                     </div>
                                 </td>
                             </tr>
@@ -1050,6 +1374,34 @@
                     </table>
                 </div>
             </div>
+
+            <div id="manage-llms" class="content-section">
+                <div class="form-container">
+                    <h2 class="form-title">Upload LLM Documents</h2>
+                    <form id="llmForm" action="{% url 'manage_llm' %}" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label for="document_name" class="form-label">Document Name</label>
+                            <input type="text" class="form-control" id="document_name" name="document_name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="document" class="form-label">Upload File (PDF, PPT, DOCX)</label>
+                            <div class="file-upload">
+                                <input type="file" class="form-control" id="document" name="document" accept=".pdf,.ppt,.pptx,.doc,.docx" required>
+                                <small class="file-hint">Click to browse or drag & drop files here</small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions" style="display: flex; gap: 1rem;">
+                            <button type="submit" class="btn btn-primary" style="flex: 1;">Upload Document</button>
+                            <button type="button" class="btn btn-outline" style="flex: 1;" onclick="showSection('uploaded-llm-docs')">View Documents</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+    
             
             <!-- eGuru Chatbot Section -->
             <div id="eguru-chatbot" class="content-section">
@@ -1088,15 +1440,40 @@
         </div>
     </div>
 
-    <!-- Floating Chat Button -->
-    <div class="floating-chat-btn" onclick="showChatSection()">
-        <i class="fas fa-comment-dots"></i>
-    </div>
+    
 
     <script>
+        // Toggle profile dropdown
+        document.getElementById('profileToggle').addEventListener('click', function() {
+            document.getElementById('profileDropdown').classList.toggle('active');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#profileToggle')) {
+                document.getElementById('profileDropdown').classList.remove('active');
+            }
+        });
         // Navigation between sections
         const links = document.querySelectorAll('.nav-link');
         const sections = document.querySelectorAll('.content-section');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const defaultSectionId = 'dashboard';
+            const defaultSection = document.getElementById(defaultSectionId);
+        
+            // Remove active from all links
+            links.forEach(l => l.classList.remove('active'));
+        
+            // Hide all sections
+            sections.forEach(section => section.style.display = 'none');
+        
+            // Show default section and set link as active
+            if (defaultSection) {
+                defaultSection.style.display = 'block';
+                 // if dashboard
+            }
+        });
 
         links.forEach(link => {
             link.addEventListener('click', function(e) {
@@ -1121,18 +1498,11 @@
                 }
                 
                 // If showing dashboard, initialize progress chart
-                if (targetId === 'dashboard') {
-                    initProgressChart();
-                }
+                
             });
         });
 
-        // Toggle profile dropdown
-        function toggleProfileDropdown() {
-            const dropdown = document.querySelector('.profile-dropdown');
-            dropdown.classList.toggle('active');
-        }
-
+        
         // Close profile dropdown when clicking outside
         document.addEventListener('click', function(event) {
             const profile = document.querySelector('.user-profile');
@@ -1175,6 +1545,77 @@
             });
         }
 
+        // Filter LLM Documents
+        function filterLLMDocs() {
+            let searchInput = document.getElementById("llmSearchInput").value.toLowerCase();
+            let rows = document.querySelectorAll("#llmTableBody tr");
+  
+            rows.forEach(row => {
+                let docName = row.cells[0].textContent.toLowerCase();
+                row.style.display = docName.includes(searchInput) ? "" : "none";
+            });
+        }
+        // Initialize event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // User search and filter
+            document.getElementById('userSearchInput').addEventListener('input', filterUsers);
+            document.getElementById('userFilter').addEventListener('change', filterUsers);
+            
+            // LLM document search
+            document.getElementById('llmSearchInput').addEventListener('input', filterLLMDocs);
+            
+            // File upload hover effects
+            document.querySelectorAll('.file-upload').forEach(upload => {
+                const input = upload.querySelector('input[type="file"]');
+                const hint = upload.querySelector('.file-hint');
+                
+                input.addEventListener('change', function() {
+                    if (this.files.length > 0) {
+                        hint.textContent = this.files[0].name;
+                    }
+                });
+                
+                upload.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    upload.style.backgroundColor = 'rgba(110,72,170,0.05)';
+                });
+                
+                upload.addEventListener('dragleave', () => {
+                    upload.style.backgroundColor = '';
+                });
+                
+                upload.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    upload.style.backgroundColor = '';
+                    if (e.dataTransfer.files.length > 0) {
+                        input.files = e.dataTransfer.files;
+                        hint.textContent = e.dataTransfer.files[0].name;
+                    }
+                });
+            });
+        });
+
+
+        // Navigation links
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                showSection(this.getAttribute('href').substring(1));
+            });
+        });
+
+                
+        // Section navigation
+        function showSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById(sectionId).style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+        
         document.getElementById('sendButton').addEventListener('click', async function () {
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
@@ -1216,16 +1657,51 @@
                 chatBox.scrollTop = chatBox.scrollHeight;
             }
         });
-        // Initialize progress chart
-        function initProgressChart() {
+        function computeQuarterly(data) {
+            return [
+                data.slice(0, 3).reduce((a, b) => a + b, 0),
+                data.slice(3, 6).reduce((a, b) => a + b, 0),
+                data.slice(6, 9).reduce((a, b) => a + b, 0),
+                data.slice(9, 12).reduce((a, b) => a + b, 0)
+            ];
+        }
+        
+        const progressData = {
+            monthly: {
+                labels: {{ month_labels|safe }},
+                enrolled: {{ month_enroll|safe }},
+                completed: {{ month_complete|safe }}
+            },
+            quarterly: {
+                labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                enrolled: computeQuarterly({{ month_enroll|safe }}),
+                completed: computeQuarterly({{ month_complete|safe }})
+            },
+            yearly: {
+                labels: {{ year_labels|safe }},
+                enrolled: {{ year_enroll|safe }},
+                completed: {{ year_complete|safe }}
+            }
+        };
+        
+        let progressChart = null;
+        
+        function renderProgressChart(type) {
             const ctx = document.getElementById('progressChart').getContext('2d');
-            new Chart(ctx, {
+        
+            if (progressChart) {
+                progressChart.destroy();
+            }
+        
+            const chartData = progressData[type];
+        
+            progressChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                    labels: chartData.labels,
                     datasets: [{
                         label: 'Completed Trainings',
-                        data: [12, 19, 3, 5, 2, 3, 8],
+                        data: chartData.completed,
                         backgroundColor: 'rgba(110, 72, 170, 0.2)',
                         borderColor: 'rgba(110, 72, 170, 1)',
                         borderWidth: 2,
@@ -1233,7 +1709,7 @@
                         fill: true
                     }, {
                         label: 'Enrolled Trainings',
-                        data: [5, 10, 15, 8, 12, 6, 10],
+                        data: chartData.enrolled,
                         backgroundColor: 'rgba(157, 80, 187, 0.2)',
                         borderColor: 'rgba(157, 80, 187, 1)',
                         borderWidth: 2,
@@ -1244,23 +1720,29 @@
                 options: {
                     responsive: true,
                     plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                        }
+                        legend: { position: 'top' },
+                        tooltip: { mode: 'index', intersect: false }
                     },
                     scales: {
-                        y: {
-                            beginAtZero: true
-                        }
+                        y: { beginAtZero: true }
                     }
                 }
             });
         }
-
+        
+        document.querySelectorAll('.chart-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderProgressChart(btn.getAttribute('data-chart-type'));
+            });
+        });
+        
+        // Load default chart
+        renderProgressChart('monthly');
+        
+        // Initialize progress chart
+        
         // Initialize analytics chart
         function initAnalyticsChart() {
             const ctx = document.getElementById('analyticsChart').getContext('2d');
@@ -1294,6 +1776,22 @@
                     }
                 }
             });
+        }
+        function toggleSidebar() {
+            const sidebar = document.getElementById("sidebar");
+            sidebar.classList.toggle("active");
+
+            // Delay adding the event listener to avoid immediate close
+            setTimeout(() => {
+                const handleClickOutside = function (e) {
+                    const hamburger = document.querySelector('.hamburger');
+                    if (!sidebar.contains(e.target) && !hamburger.contains(e.target)) {
+                        sidebar.classList.remove('active');
+                        document.removeEventListener('click', handleClickOutside);
+                    }
+                };
+                document.addEventListener('click', handleClickOutside);
+            }, 0);
         }
     </script>
 </body>

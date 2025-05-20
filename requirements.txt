@@ -1,0 +1,12 @@
+Django
+pymongo
+sentence-transformers
+PyMuPDF
+python-docx
+python-pptx
+openpyxl
+numpy
+requests
+bson
+pytesseract
+google-generativeai
