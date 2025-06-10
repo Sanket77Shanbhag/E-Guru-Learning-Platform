@@ -1413,8 +1413,7 @@
                                             onclick="handleEnrollment(this, 'reject')">Reject</button>
                                 </div>
                             </div>
-                        {% endif %}
-                        {% if enroll.status != 'pending' %}
+                        {% elif enroll.status != 'pending' %}
                             <div class="notification-item">
                                 <div class="notification-content">
                                     No pending requests

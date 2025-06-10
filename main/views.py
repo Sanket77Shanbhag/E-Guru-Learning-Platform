@@ -38,7 +38,7 @@ completed_trainings = db['completed_trainings']
 materials_collection = db['materials']
 review_collection = db['review']
 
-# Constants for chunking
+
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
 
