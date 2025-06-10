@@ -9,17 +9,26 @@
     <style>
         :root {
             --primary: #6e48aa;
+            --primary-light: #9d50bb;
             --secondary: #9d50bb;
             --accent: #ff6584;
+            --accent-light: #ff8fa3;
             --light: #f8f9fa;
             --dark: #343a40;
-            --success: #28a745;
-            --card-bg: #ffffff;
-            --sidebar-bg: #f0f2f5;
             --text-dark: #2d3748;
+            --text-medium: #4a5568;
             --text-light: #718096;
-            --bg-color: #f5f7fa;
-            --border-color: #e0e0e0;
+            --border-color: #e2e8f0;
+            --star-color: #ffb400;
+            --success: #4ade80;
+            --card-bg: #ffffff;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
         * {
@@ -35,6 +44,44 @@
             min-height: 100vh;
             line-height: 1.5;
             overflow-x: hidden;
+        }
+        .review-form {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .star-rating {
+            margin: 15px 0;
+            font-size: 24px;
+        }
+        
+        .star {
+            color: #ccc;
+            cursor: pointer;
+        }
+        
+        .star:hover,
+        .star.active {
+            color: var(--star-color);
+        }
+        .review-text {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .submit-review {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
         }
 
         .training-container {
@@ -81,6 +128,258 @@
             transform: translateY(-2px);
         }
 
+        .rating-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .rating-header h3 {
+            font-size: 1.5rem;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        .review-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .review-btn:hover {
+            background: var(--primary-light);
+        }
+
+        .overall-rating {
+            margin-bottom: 1.5rem;
+        }
+
+        .rating-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .total-ratings {
+            color: var(--text-medium);
+            font-size: 0.9rem;
+        }
+
+        /* AI Summary */
+        .ai-summary {
+            background: linear-gradient(135deg, #f5f7fa 0%, #f8f9fa 100%);
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-summary::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary), var(--primary-light));
+        }
+
+        .ai-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .ai-summary h3 {
+            font-size: 1.1rem;
+            margin: 0;
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .ai-icon {
+            font-size: 1.2rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .reviews-carousel {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-button {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .nav-button:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .reviews-lists {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            min-height: 200px;
+        }
+
+        .review-item {
+            position: absolute;
+            width: 100%;
+            padding: 1rem;
+            background: var(--card-bg);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateX(100%);
+        }
+
+        .review-item.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .review-author {
+            font-weight: 600;
+            font-size: clamp(1rem, 1.5vw, 1.3rem); /* Responsive font size */
+            color: var(--primary);
+        }
+
+        .review-rating {
+            color: var(--star-color);
+            white-space: nowrap;
+            font-size: clamp(0.9rem, 1.2vw, 1rem); /* Responsive font size */
+        }
+
+        .rating-label {
+            color: var(--text-medium);
+            font-size: clamp(0.75rem, 0.9vw, 0.85rem);
+            margin-left: 0.25rem;
+        }
+
+        .review-date {
+            display: block;
+            color: var(--text-light);
+            font-size: clamp(0.75rem, 0.9vw, 0.85rem);
+            margin-bottom: 0.5rem;
+        }
+
+        .review-comment {
+            color: var(--text-medium);
+            line-height: 1.5;
+            margin: 0.5rem 0 1rem;
+            font-size: clamp(0.9rem, 1.1vw, 1rem); /* Responsive font size */
+        }
+
+        .review-verified {
+            font-size: clamp(0.7rem, 0.8vw, 0.8rem);
+            color: var(--success);
+        }
+
+        .carousel-dots {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border-color);
+            margin: 0 3px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .dot.active {
+            background: var(--primary);
+            transform: scale(1.2);
+        }
+
+        .no-reviews {
+            text-align: center;
+            color: var(--text-medium);
+            padding: 2rem 0;
+            font-size: clamp(0.9rem, 1.2vw, 1.1rem);
+        }
+
+        /* Mobile-specific adjustments */
+        @media (max-width: 768px) {
+            .reviews-lists {
+                min-height: 250px; /* Slightly taller for mobile */
+            }
+            
+            .review-item {
+                padding: 0.75rem;
+            }
+            
+            .review-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.25rem;
+            }
+            
+            .review-comment {
+                margin: 0.25rem 0 0.75rem;
+            }
+            
+            .dot {
+                width: 6px;
+                height: 6px;
+                margin: 0 2px;
+            }
+        }
+
+        /* Very small devices */
+        @media (max-width: 480px) {
+            .reviews-lists {
+                min-height: 220px;
+            }
+            
+            .review-date {
+                margin-bottom: 0.25rem;
+            }
+        }
         .btn-add {
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             color: white;
@@ -118,7 +417,59 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             width: 100%;
         }
+        .approval-waiting-container {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            max-width: 600px;
+            margin: 20px auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid var(--primary);
+        }
 
+        .approval-animation {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .spinning {
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(180deg); }
+        }
+
+        .approval-message h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .creative-line {
+            font-style: italic;
+            color: var(--secondary);
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .status-tip {
+            background: var(--light);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: inline-block;
+            color: var(--dark);
+            border: 1px solid var(--border-color);
+        }
+
+        .status-tip i {
+            margin-right: 8px;
+            color: var(--accent);
+        }
         .course-image {
             width: 100%;
             height: 250px;
@@ -146,12 +497,107 @@
 
         .course-meta {
             display: flex;
-            gap: 15px;
             margin-bottom: 20px;
             color: var(--text-light);
             font-size: 14px;
             flex-wrap: wrap;
         }
+        .course-meta1{
+            display: flex;
+            gap: 15px;
+            flex: 1;
+            margin-bottom: 20px;
+            color: var(--text-light);
+            font-size: 14px;
+            flex-wrap: wrap;
+        }
+        .course-meta2 {
+            display: flex;
+            align-items: right;
+            color:  var(--star-color);
+            font-size: 14px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .rating-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .rating-section {
+            background-color: var(--card-bg);
+            flex: 1;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .overall-rating {
+            margin-bottom: 20px;
+        }
+        
+        .rating-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+        
+        .total-ratings {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+        .stars {
+            width: 50px;
+            font-size: 14px;
+            color: var(--text-dark);
+        }        
+        .info-icon {
+            cursor: pointer;
+        }
+        
+        .review-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            position: relative;
+            top: 1rem;
+            right: 1rem;
+        }
+        
+        .review-btn:hover {
+            background-color: var(--secondary);
+        }
+        
+        .review-form {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .star-rating {
+            margin: 15px 0;
+            font-size: 24px;
+        }
+        
+        .star {
+            color: #ccc;
+            cursor: pointer;
+        }
+        
+        .star:hover,
+        .star.active {
+            color: var(--star-color);
+        }
+        
 
         /* Tabs Container */
         .course-tabs {
@@ -483,10 +929,13 @@
             gap: 8px;
             flex-wrap: wrap;
         }
-
+        .add-materials-form{
+            flex: 1;
+        }
         /* Form Styles */
         .forms-wrapper {
             display: flex;
+            flex-direction: column;
             gap: 1rem;
             justify-content: center;    
             flex-wrap: wrap;
@@ -546,17 +995,28 @@
             font-weight: 500;
         }
         .form-container.add-quiz {
-            flex: 1; 
+            flex: 2; 
             min-width: 0;
             margin: 2rem auto;
             padding: 1.5rem; 
-            max-width: 600px;
-            max-height: none;
+            width: 500px;
+            height: 350px;
         }
         .btn-primary:hover {
             background-color: var(--secondary);
         }
-
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .btn-secondary:hover {
+            background-color: var(--primary);
+        }
         .btn-outline {
             background-color: transparent;
             color: var(--primary);
@@ -570,7 +1030,16 @@
         .btn-outline:hover {
             background-color: rgba(110, 72, 170, 0.1);
         }
-
+        .question-block {
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            background: #f9f9f9;
+        }
+        .question-block input[type="radio"] {
+            margin-right: 10px;
+        }
         /* Responsive Breakpoints */
         /* Large devices (desktops, 1200px and up) */
         @media (min-width: 1200px) {
@@ -695,14 +1164,21 @@
                     <span>Instructor: {{ training.instructor_name}}</span>
                 </div>
                 <div class="course-meta">
-                    <span><i class="far fa-clock"></i> {{ training.duration }}</span>
-                    <span><i class="far fa-calendar-alt"></i> {{ training.start_date|date:"d M Y" }}</span>
+                    <div class="course-meta1">
+                        <span><i class="far fa-clock"></i> {{ training.duration }}</span>
+                        <span><i class="far fa-calendar-alt"></i> {{ training.start_date|date:"d M Y" }}</span>
+                    </div>
+                    <div class="course-meta2">
+                        <i class="fas fa-star"></i> <span id= "overallRating"> 0.0 out of 5</span>
+                    </div>
                 </div>
 
                 <div class="course-tabs">
                     <div class="tab active" data-tab="description">Description</div>
                     <div class="tab" data-tab="benefits">Benefits</div>
-                    <div class="tab" data-tab="materials">Training Materials</div>
+                    {% if user.role|lower == 'admin' or status == 'enrolled'%}
+                        <div class="tab" data-tab="materials">Training Materials</div>
+                    {% endif %}
                 </div>
 
                 <!-- Tab Contents -->
@@ -738,7 +1214,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div id="materials" class="tab-content">
                     <h3>Training Materials</h3>
                     <!-- Materials List -->
@@ -751,7 +1226,7 @@
                                         <span class="material-icon">
                                             {% if material.type == 'video' %}🎬
                                             {% elif material.type == 'file' %}📖
-                                            {% elif material.type == 'quiz' %}❓
+                                            {% elif material.type == 'link' %}❓
                                             {% else %}📄{% endif %}
                                         </span>
                                         <div>
@@ -774,7 +1249,6 @@
                                         </button>
                                     {% endif %}
                                 </div>
-                                <!-- Add separator if not last item -->
                                 {% if not loop.last %}
                                     <div class="material-separator"></div>
                                 {% endif %}
@@ -800,16 +1274,15 @@
                                 Complete Training
                             </button>
                         
-                        {% elif compstatus != 'completed' %}
+                        {% elif compstatus != 'completed' and status != 'pending' %}
                             <!-- Not enrolled yet, show enroll form -->
                             <form action="{% url 'enroll_training' training_id %}" method="post">
                                 {% csrf_token %}
                                 <input type="hidden" name="pb_number" value="{{ user.pb_number }}">
+                                <input type="hidden" name="name" value="{{ user.name }}">
                                 <input type="hidden" name="training_id" value="{{ training_id }}">
-                                <input type="hidden" name="training_title" value="{{ training.title }}">
                                 <button type="submit" class="btn-add">Enroll Now</button>
                             </form><br>
-                
                         {% endif %}
                 
                         {% if compstatus == 'completed' %}
@@ -828,13 +1301,26 @@
                                     <span class="emoji">🎉</span> Congratulations <b class="user-name">{{ user.name }}</b> on successfully completing the training <b>{{training.title}}</b>
                                 </div>
                             </div>
+                        
+                        {% elif status == 'pending' %}
+                            <div class="approval-waiting-container">
+                                <div class="approval-animation">
+                                    <i class="fas fa-hourglass-half spinning"></i>
+                                </div>
+                                <div class="approval-message">
+                                    <h3>Awaiting Admin Approval</h3>
+                                    <p class="creative-line">Your training journey is just around the corner!</p>
+                                    <p>We're currently reviewing your enrollment request. The training materials will become available as soon as your access is approved.</p>
+                                    <div class="status-tip">
+                                        <i class="fas fa-lightbulb"></i> You'll receive a notification email once approved
+                                    </div>
+                                </div>
+                            </div>
+
                         {% endif %}
                 </div>
             {% endif %}
         </div>
-
-        
-
         <!-- Add Materials Form -->
         <div id="add-materials-form" class="content-section" style="display: none;">
             <div class="forms-wrapper"> 
@@ -854,7 +1340,7 @@
                             <select id="material-type" name="type" class="form-control" required>
                                 <option value="file">PDF File</option>
                                 <option value="video">Video</option>
-                                <option value="link">External Link</option>
+                                <option value="link">Quiz Link</option>
                             </select>
                         </div>
 
@@ -886,8 +1372,8 @@
                 </div>
 
                 <div class="form-container add-quiz">
-                    <h2 class="form-title">Conduct Quiz</h2>
-                    <form method="post" enctype="multipart/form-data">
+                    <h2 class="form-title">Generate Quiz</h2>
+                    <form method="post" enctype="multipart/form-data" id="materialform">
                         {% csrf_token %}
                         <div class="form-group">
                             <label for="material_file" class="form-label">Upload File</label>
@@ -895,45 +1381,133 @@
                         </div>
                         <button type="submit" class="btn btn-primary">Generate questions</button>
                     </form>
+                    <br>
+                    <button id="genquiz" class="btn btn-secondary mt-3">Review Generated Questions</button>
                 </div>
+            </div>
+        </div>
+        {% if user.role|lower == 'admin' %}
+            <div class="quiz-questions content-section" id="quiz-questions" style="display: none;" enctype="multipart/form-data">
+                <h2>Review Generated Questions</h2>
+                <div class="quiz-output">
+                    <p>No questions generated yet. Please upload a file to generate questions.</p>
+                </div>
+                <form method="post" action="{% url 'save_quiz' %}"  id="saveQuizForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="training_id" value="{{ training_id }}">
+                    <input type="hidden" name="quiz_data" id="quizDataInput">
+                    <button type="submit" class="btn btn-primary mt-2">Save Quiz to Database</button>
+                </form>
+                <div class="form-actions">
+                    <button type="button" id="cancelQuizBtn" class="btn-outline">Cancel</button>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="rating-section" id="ratingContent">
+            <div class="rating-header">
+                <h3>Training Feedbacks</h3>
+                <button class="review-btn" id="reviewButton">Write your valuable feedback</button>
+            </div>
+            
+            <div class="overall-rating">
+                <div class="rating-value" id="overallRatings">0.0 out of 5</div>
+                <div class="total-ratings" id="totalRatings">Overall 0 ratings</div>
+            </div>
+            
+            
+            <div class="ai-summary">
+                <div class="ai-header">
+                    <h3 id="ai-summary-title"></h3>
+                    <div class="ai-icon">🤖</div>
+                </div>
+                {% if ai_summary %}
+                    <p id="aiSummaryText">{{ ai_summary }}</p>
+                {% else %}
+                    <p id="aiSummaryText">No feedbacks available yet. Be the first to share your experience!</p>
+                {% endif %}                
+            </div>
+            <div class="reviews-carousel">
+                <button class="nav-button prev-button" aria-label="Previous review">❮</button>
+                
+                <div class="reviews-lists">
+                    {% if reviews %}
+                        {% for review in reviews %}
+                        <div class="review-item {% if forloop.first %}active{% endif %}">
+                            <div class="review-header">
+                                <span class="review-author">{{ review.user }}</span>
+                                <span class="review-rating">
+                                    {% with ''|center:review.rating as range %}
+                                        {% for _ in range %}★{% endfor %}
+                                    {% endwith %}
+                                    {% if review.rating >= 4.5 %}
+                                        <span class="rating-label">(Excellent)</span>
+                                    {% elif review.rating >= 3.5 %}
+                                        <span class="rating-label">(Good)</span>
+                                    {% elif review.rating >= 2.5 %}
+                                        <span class="rating-label">(Average)</span>
+                                    {% else %}
+                                        <span class="rating-label">(Poor)</span>
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <span class="review-date">{{ review.timestamp|date:"d M Y" }}</span>
+                            <p class="review-comment">{{ review.comment }}</p>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="no-reviews">No feedbacks yet. Be the first to share your thoughts!</p>
+                    {% endif %}
+                </div>
+                
+                <button class="nav-button next-button" aria-label="Next review">❯</button>
+            </div>
+            <div class="carousel-dots">
+                {% if reviews %}
+                    {% for review in reviews|slice:":6" %}
+                        <span class="dot active"></span>
+                    {% endfor %}
+                {% endif %}
             </div>
         </div>
 
-        <div class="container">
-            <h2>Review Generated Questions</h2>
-            <div class="quiz-questions">
-                {% for question in questions %}
-                <div class="card mb-3 {% if question.status == 'approved' %}border-success{% endif %}">
-                    <div class="card-body">
-                        <h5 class="card-title">Question {{ forloop.counter }}</h5>
-                        <p class="card-text">{{ question.question }}</p>
-                        <ul class="list-group list-group-flush">
-                            {% for option in question.options %}
-                            <li class="list-group-item {% if option == question.correct_answer %}list-group-item-success{% endif %}">
-                                {{ option }}
-                                {% if option == question.correct_answer %}(Correct){% endif %}
-                            </li>
-                            {% endfor %}
-                        </ul>
-                        {% if question.status != 'approved' %}
-                        <a href="{% url 'approve_question' quiz_id=quiz_id question_index=forloop.counter0 %}" 
-                        class="btn btn-success mt-2">
-                            Approve Question
-                        </a>
-                        {% else %}
-                        <span class="badge bg-success mt-2">Approved</span>
-                        {% endif %}
-                    </div>
+
+        <div class="review-form" id="reviewForm" style="display: none;">
+            <h3>Your Feedback</h3>
+            <form id="reviewForms">
+                {% csrf_token %}
+                <input type="hidden" name="training_id" value="{{ training_id }}">
+                <input type="hidden" name="training_title" value="{{ training.title }}">
+                <input type="hidden" name="user_name" value="{{ user.name }}">
+                <input type="hidden" name="pb_number" value="{{ user.pb_number }}">
+                <input type="hidden" name="rating" id="ratingValue">
+
+                <div class="star-rating">
+                    <span class="star" data-value="1">★</span>
+                    <span class="star" data-value="2">★</span>
+                    <span class="star" data-value="3">★</span>
+                    <span class="star" data-value="4">★</span>
+                    <span class="star" data-value="5">★</span>
                 </div>
-                {% endfor %}
-            </div>
+                <textarea name="comment" id="reviewComment" class="review-text" placeholder="Share your thoughts about this course..." required></textarea>
+                <p id="wordCountMessage" style="color: red; display: none;">Please limit your response to 50 words.</p>
+                <button type="submit" class="submit-review">Submit Response</button>
+            </form>
         </div>
+
     </div>
 
-
-
     <script>
-        // Tab Switching Functionality
+        const summaryTitle = "AI-Generated Summary";
+        let i = 0;
+        function typeWriter() {
+            if (i < summaryTitle.length) {
+                document.getElementById("ai-summary-title").innerHTML += summaryTitle.charAt(i);
+                i++;
+                setTimeout(typeWriter, 60);
+            }
+        }
+        typeWriter();
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize tabs
             const tabs = document.querySelectorAll('.tab');
@@ -953,13 +1527,16 @@
                 });
             });
         });
+        
         document.addEventListener('DOMContentLoaded', function() {
             const addMaterialsBtn = document.getElementById('addMaterialsBtn');
             const trainingContent = document.getElementById('trainingContent');
+            const generatequizBtn = document.getElementById('genquiz');
+            const ratingContent = document.getElementById('ratingContent');
             const addMaterialsForm = document.getElementById('add-materials-form');
             const cancelMaterialBtn = document.getElementById('cancelMaterialBtn');
             const materialType = document.getElementById('material-type');
-            
+            const cancelQuizBtn = document.getElementById('cancelQuizBtn');
 
             materialType.addEventListener('change', function() {
                 document.getElementById('file-field').style.display = 'none';
@@ -972,28 +1549,52 @@
                     document.getElementById('video-field').style.display = 'block';
                 } else if (this.value === 'link') {
                     document.getElementById('link-field').style.display = 'block';
+                } else if (this.value === 'quiz') {
+                    // Hide all file upload fields for quiz
+                    document.querySelector('.form-container:not(.add-quiz)').style.display = 'none';
+                    document.querySelector('.add-quiz').style.display = 'block';
                 }
             });
             
-            // Toggle between training content and add materials form
             if (addMaterialsBtn) {
                 addMaterialsBtn.addEventListener('click', function() {
                     trainingContent.style.display = 'none';
                     addMaterialsForm.style.display = 'block';
+                    ratingContent.style.display = 'none';
+                    document.getElementById('quiz-questions').style.display = 'none';
                 });
             }
-            
+            if( generatequizBtn) {
+                generatequizBtn.addEventListener('click', function() {
+                    trainingContent.style.display = 'none';
+                    addMaterialsForm.style.display = 'none';
+                    ratingContent.style.display = 'none';
+                    document.getElementById('quiz-questions').style.display = 'block';
+                });
+            }
             if (cancelMaterialBtn) {
                 cancelMaterialBtn.addEventListener('click', function() {
                     trainingContent.style.display = 'block';
                     trainingContent.style.display = 'flex';
+                    ratingContent.style.display = 'block';
                     addMaterialsForm.style.display = 'none';
+                    document.getElementById('quiz-questions').style.display = 'none';
+                });
+            }
+            if (cancelQuizBtn) {
+                cancelQuizBtn.addEventListener('click', function() {
+                    trainingContent.style.display = 'block';
+                    addMaterialsForm.style.display = 'none';
+                    ratingContent.style.display = 'block';
+                    document.getElementById('quiz-questions').style.display = 'none';
                 });
             }
         });
         function toggleMaterialsForm() {
             const form = document.getElementById('add-materials-form');
+            const gen = document.getElementById('quiz-questions');
             form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            gen.style.display = 'none';
         }
 
         function deleteMaterial(button) {
@@ -1024,6 +1625,79 @@
                 console.error('Error:', error);
             });
         }
+
+        document.getElementById('materialform').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const form = document.getElementById('materialform');
+            const formData = new FormData(form);
+
+            fetch("{% url 'generate_quiz' %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const outputDiv = document.querySelector('.quiz-output');
+                    outputDiv.innerHTML = ''; // Clear old content
+
+                    data.questions.forEach((q, index) => {
+                        const questionBlock = document.createElement('div');
+                        questionBlock.classList.add('question-block');
+
+                        questionBlock.innerHTML = renderQuestionHTML(q, index);
+
+                        outputDiv.appendChild(questionBlock);
+
+                        // Add Edit Button functionality
+                        questionBlock.querySelector('.edit-btn').addEventListener('click', () => {
+                            renderEditForm(questionBlock, q, index);
+                        });
+                    });
+
+                    // Add new question button
+                    const addButton = document.createElement('button');
+                    addButton.textContent = 'Add Question';
+                    addButton.style.marginTop = '20px';
+                    addButton.style.padding = '10px 20px';
+                    addButton.style.background = 'var(--primary)';
+                    addButton.style.color = 'white';
+                    addButton.style.border = 'none';
+                    addButton.style.borderRadius = '4px';
+                    addButton.style.cursor = 'pointer';
+                    addButton.style.fontWeight = '500';
+                    addButton.style.transition = 'background-color 0.2s ease';
+                    addButton.style.display = 'block';
+                    addButton.style.width = '100%';
+                    addButton.style.maxWidth = '200px';
+                    addButton.style.margin = '20px auto';
+
+                    // Hover effect
+                    addButton.onmouseenter = () => {
+                        addButton.style.background = 'var(--secondary)';
+                    };
+                    addButton.onmouseleave = () => {
+                        addButton.style.background = 'var(--primary)';
+                    };
+
+                    addButton.onclick = () => renderAddForm(outputDiv);
+                    outputDiv.appendChild(addButton);
+                } else {
+                    alert(data.message || 'Failed to generate quiz.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        document.getElementById('genquiz').addEventListener('click', () => {
+            document.getElementById('quiz-questions').style.display = 'block';
+        });
 
         // Progress Bar Functionality
         document.addEventListener('DOMContentLoaded', () => {
@@ -1065,6 +1739,7 @@
             completeTrainingBtn.addEventListener('click', () => {
                 const trainingId = "{{ training_id }}";
                 const pb_number = "{{ user.pb_number }}";
+                const tcategory = "{{ training.category }}";
                 fetch("{% url 'complete_training' %}", {
                     method: 'POST',
                     headers: {
@@ -1074,6 +1749,7 @@
                     body: JSON.stringify({ 
                         training_id: trainingId,
                         pb_number: pb_number,
+                        tcategory: tcategory,
                         completed: true })
                 })
                 .then(response => response.json())
@@ -1093,6 +1769,329 @@
             updateProgressBar();  // Initial load
         });
 
+        // Function to render question HTML
+        function renderQuestionHTML(q, index) {
+            return `
+                <div class="question-block" style="background: var(--card-bg); padding: 15px; margin-bottom: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <p style="color: var(--text-dark); font-weight: 500;"><strong>${index + 1}. ${q.question}</strong></p>
+                    ${q.options.map((opt, i) => `
+                        <label style="display: block; margin-bottom: 8px; padding: 8px; border-radius: 4px; background: ${q.correct === i ? 'var(--success)' : 'var(--sidebar-bg)'}; color: ${q.correct === i ? 'white' : 'var(--text-dark)'};">
+                            <input type="radio" name="q${index}" ${q.correct === i ? 'checked' : ''} disabled style="margin-right: 8px;">
+                            ${opt}
+                        </label>
+                    `).join('')}
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button class="edit-btn" style="padding: 8px 15px; background: var(--secondary); color: white; border: none; border-radius: 4px; cursor: pointer;">Edit</button>
+                        <button class="delete-btn" style="padding: 8px 15px; background: var(--accent); color: white; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
+                    </div>
+                </div>
+            `;
+        }
+        // Function to render an editable form
+        function renderEditForm(container, q, index) {
+            container.innerHTML = `
+                <div class="edit-form" style="background: var(--card-bg); padding: 15px; margin-bottom: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <p style="color: var(--primary); font-weight: 500;"><strong>Edit Question ${index + 1}</strong></p>
+                    <input type="text" value="${q.question}" class="edit-question" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid var(--border-color); border-radius: 4px;"><br>
+                    ${q.options.map((opt, i) => `
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <input type="text" value="${opt}" class="edit-option" data-index="${i}" style="flex-grow: 1; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; margin-right: 8px;">
+                            <input type="radio" name="edit-correct-${index}" value="${i}" ${q.correct === i ? 'checked' : ''} style="margin-right: 8px;"> Correct
+                        </div>
+                    `).join('')}
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button class="save-btn" style="padding: 8px 15px; background: var(--success); color: white; border: none; border-radius: 4px; cursor: pointer;">Save</button>
+                        <button class="cancel-btn" style="padding: 8px 15px; background: var(--accent); color: white; border: none; border-radius: 4px; cursor: pointer;">Cancel</button>
+                    </div>
+                </div>
+            `;
+
+            container.querySelector('.save-btn').addEventListener('click', () => {
+                const updatedQuestion = container.querySelector('.edit-question').value;
+                const updatedOptions = Array.from(container.querySelectorAll('.edit-option')).map(input => input.value);
+                const correctIndex = parseInt(container.querySelector(`input[name="edit-correct-${index}"]:checked`).value);
+                const updatedQ = {
+                    question: updatedQuestion,
+                    options: updatedOptions,
+                    correct: correctIndex
+                };
+
+                container.innerHTML = renderQuestionHTML(updatedQ, index);
+                container.querySelector('.edit-btn').addEventListener('click', () => {
+                    renderEditForm(container, updatedQ, index);
+                });
+                container.querySelector('.delete-btn').addEventListener('click', () => {
+                    container.remove();
+                    // Here you would also typically make an API call to delete from the database
+                });
+            });
+
+            container.querySelector('.cancel-btn').addEventListener('click', () => {
+                container.innerHTML = renderQuestionHTML(q, index);
+                container.querySelector('.edit-btn').addEventListener('click', () => {
+                    renderEditForm(container, q, index);
+                });
+                container.querySelector('.delete-btn').addEventListener('click', () => {
+                    container.remove();
+                    // Here you would also typically make an API call to delete from the database
+                });
+            });
+        }
+        // Function to render a form for adding a new question
+        function renderAddForm(container) {
+            const addBlock = document.createElement('div');
+            addBlock.classList.add('question-block');
+            addBlock.style.background = 'var(--card-bg)';
+            addBlock.style.padding = '15px';
+            addBlock.style.marginBottom = '15px';
+            addBlock.style.borderRadius = '8px';
+            addBlock.style.border = '1px solid var(--border-color)';
+            
+            addBlock.innerHTML = `
+                <p style="color: var(--primary); font-weight: 500;"><strong>Add New Question</strong></p>
+                <input type="text" placeholder="Enter question" class="add-question" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid var(--border-color); border-radius: 4px;"><br>
+                ${[0, 1, 2, 3].map(i => `
+                    <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                        <input type="text" placeholder="Option ${i + 1}" class="add-option" data-index="${i}" style="flex-grow: 1; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; margin-right: 8px;">
+                        <input type="radio" name="add-correct" value="${i}" style="margin-right: 8px;"> Correct
+                    </div>
+                `).join('')}
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button class="submit-add" style="padding: 8px 15px; background: var(--success); color: white; border: none; border-radius: 4px; cursor: pointer;">Submit</button>
+                    <button class="cancel-add" style="padding: 8px 15px; background: var(--accent); color: white; border: none; border-radius: 4px; cursor: pointer;">Cancel</button>
+                </div>
+            `;
+            container.insertBefore(addBlock, container.lastChild);
+            addBlock.querySelector('.submit-add').addEventListener('click', () => {
+                const newQuestion = addBlock.querySelector('.add-question').value;
+                const options = Array.from(addBlock.querySelectorAll('.add-option')).map(input => input.value);
+                const correctIndex = parseInt(addBlock.querySelector(`input[name="add-correct"]:checked`)?.value);
+
+                if (!newQuestion || options.some(opt => !opt) || isNaN(correctIndex)) {
+                    alert("Please complete all fields and select a correct answer.");
+                    return;
+                }
+                
+                const newIndex = container.querySelectorAll('.question-block').length - 1;
+                addBlock.innerHTML = renderQuestionHTML({ question: newQuestion, options, correct: correctIndex }, newIndex);
+                addBlock.querySelector('.edit-btn').addEventListener('click', () => {
+                    renderEditForm(addBlock, { question: newQuestion, options, correct: correctIndex }, newIndex);
+                });
+                addBlock.querySelector('.delete-btn').addEventListener('click', () => {
+                    addBlock.remove();
+                });
+            });
+            addBlock.querySelector('.cancel-add').addEventListener('click', () => {
+                container.removeChild(addBlock);
+            });
+        }
+        // Function to prepare quiz data for saving
+        function prepareQuizData(questions) {
+            const trainingId = "{{ training_id }}";
+            const pb_number = "{{ user.pb_number }}";
+            return {
+                title: "Quiz",
+                type: "quiz",
+                training_id: trainingId, 
+                questions: questions,
+                duration: calculateQuizDuration(questions),
+                status: "active",
+            };
+        }
+
+        function calculateQuizDuration(questions) {
+            return questions.length.toString(); // Returns duration in minutes
+        }
+        // Add this to your existing JavaScript
+        document.getElementById('saveQuizForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Collect all questions from the UI
+            const questionBlocks = document.querySelectorAll('.question-block');
+            const questions = [];
+            
+            questionBlocks.forEach(block => {
+                const questionText = block.querySelector('p strong').textContent.replace(/^\d+\.\s/, '');
+                const options = Array.from(block.querySelectorAll('label')).map(label => {
+                    return label.textContent.trim();
+                });
+                const correctIndex = Array.from(block.querySelectorAll('input[type="radio"]')).findIndex(radio => radio.checked);
+                
+                questions.push({
+                    question: questionText,
+                    options: options,
+                    correct: correctIndex
+                });
+            });
+            
+            const quizData = prepareQuizData(questions);
+            document.getElementById('quizDataInput').value = JSON.stringify(quizData);
+            
+            this.submit();
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const stars = document.querySelectorAll('.star');
+            const reviewButton = document.getElementById('reviewButton');
+            const reviewForm = document.getElementById('reviewForm');
+            const reviewForms = document.getElementById('reviewForms');
+            const reviewsList = document.querySelector('.reviews-list');
+
+            // Toggle review form
+            reviewButton.addEventListener('click', () => {
+                reviewForm.style.display = reviewForm.style.display === 'none' ? 'block' : 'none';
+            });
+
+            // Handle star selection
+            stars.forEach(star => {
+                star.addEventListener('click', () => {
+                    const value = parseInt(star.getAttribute('data-value'));
+                    document.getElementById('ratingValue').value = value;
+
+                    stars.forEach((s, index) => {
+                        s.classList.toggle('active', index < value);
+                    });
+                });
+            });
+
+            reviewForms.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const commentTextArea = document.getElementById('reviewComment');
+                const message = document.getElementById('wordCountMessage');
+                const comment = commentTextArea.value.trim();
+                const words = comment.split(/\s+/);
+
+                if (words.length > 50) {
+                    message.style.display = 'block';
+                    return;
+                } else {
+                    message.style.display = 'none';
+                }
+
+                const formData = new FormData(reviewForms);
+                const rating = formData.get('rating');
+
+                if (!rating || !comment) {
+                    alert('Please provide both a star rating and a comment.');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/submit-review/', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            training_id: formData.get('training_id'),
+                            training_title: formData.get('training_title'),
+                            user: formData.get('user_name'),
+                            pb_number: formData.get('pb_number'),
+                            rating: parseInt(rating),
+                            comment: comment
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to submit review');
+                    }
+
+                    // Reset form on success
+                    commentTextArea.value = '';
+                    document.getElementById('ratingValue').value = '';
+                    stars.forEach(s => s.classList.remove('active'));
+                    reviewForm.style.display = 'none';
+                } catch (error) {
+                    console.error('Error submitting review:', error);
+                    alert('Failed to submit review. Please try again.');
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Calculate average rating
+            const reviews = document.querySelectorAll('.review-item');
+            const overallRating = document.getElementById('overallRating');
+            const overallRatings = document.getElementById('overallRatings');
+            const totalRatings = document.getElementById('totalRatings');
+            
+            if (reviews.length > 0) {
+                let total = 0;
+                let excellentCount = 0;
+                let goodCount = 0;
+                let averageCount = 0;
+                let poorCount = 0;
+                
+                reviews.forEach(review => {
+                    const stars = review.querySelector('.review-rating').textContent;
+                    const rating = stars.match(/★/g).length;
+                    total += rating;
+                    
+                    if (rating >= 4.5) excellentCount++;
+                    else if (rating >= 3.5) goodCount++;
+                    else if (rating >= 2.5) averageCount++;
+                    else poorCount++;
+                });
+                
+                const average = (total / reviews.length).toFixed(1);
+                overallRating.textContent = `${average} out of 5`;
+                overallRatings.textContent = `${average} out of 5`;
+                totalRatings.textContent = `Overall ${reviews.length} rating${reviews.length !== 1 ? 's' : ''}`;
+                
+            }
+            
+            // Carousel navigation
+            const prevBtn = document.querySelector('.prev-button');
+            const nextBtn = document.querySelector('.next-button');
+            const dots = document.querySelectorAll('.dot');
+            let currentIndex = 0;
+            
+            function showReview(index) {
+                reviews.forEach((review, i) => {
+                    review.classList.remove('active');
+                    dots[i]?.classList.remove('active');
+                    
+                    if (i === index) {
+                        review.classList.add('active');
+                        dots[i]?.classList.add('active');
+                    }
+                });
+            }
+            
+            function nextReview() {
+                currentIndex = (currentIndex + 1) % reviews.length;
+                showReview(currentIndex);
+            }
+            
+            function prevReview() {
+                currentIndex = (currentIndex - 1 + reviews.length) % reviews.length;
+                showReview(currentIndex);
+            }
+            
+            nextBtn.addEventListener('click', nextReview);
+            prevBtn.addEventListener('click', prevReview);
+            
+            // Dot navigation
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    currentIndex = index;
+                    showReview(currentIndex);
+                });
+            });
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') nextReview();
+                if (e.key === 'ArrowLeft') prevReview();
+            });
+            
+            // Initialize
+            if (reviews.length > 0) {
+                showReview(0);
+            }
+        });
     </script>
 </body>
 </html>

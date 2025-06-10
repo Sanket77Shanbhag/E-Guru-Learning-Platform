@@ -19,13 +19,14 @@ from django.urls import path
 from main import views
 from django.conf import settings
 from django.conf.urls.static import static
-from main.views import create_user, manage_trainings, manage_llm, ask_eguru
+from main.views import manage_trainings, manage_llm, ask_eguru
 
 urlpatterns = [
     path('', views.home, name='home'),
     path('signin/', views.signin, name='signin'),
     path('signup/', views.signup, name='signup'),
     path('signin/', views.signout, name='signout'),
+    path('change_password/', views.change_password, name='change_password'),
     path('admin/',views.admin_dashboard, name='admin_dashboard'),
     path('user/',views.user_dashboard, name='user_dashboard'),
     path('create_user/', views.create_user, name='create_user'),
@@ -40,4 +41,9 @@ urlpatterns = [
     path('delete_training/', views.delete_training, name='delete_training'),
     path('manage_llm/', manage_llm, name='manage_llm'),
     path('ask/', ask_eguru, name='ask_eguru'),
+    path('generate-quiz/', views.generate_quiz, name='generate_quiz'),
+    path('save_quiz/', views.save_quiz, name='save_quiz'),
+    path('accept/', views.accept, name='accept'),
+    path('reject/', views.reject, name='reject'),
+    path('submit-review/', views.submit_review, name='submit_review'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

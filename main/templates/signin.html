@@ -86,7 +86,7 @@
             line-height: 1.4;
         }
         
-        .signin-section {
+        .signin-section, .change-password-section {
             flex: 1;
             padding: 50px;
             display: flex;
@@ -94,7 +94,7 @@
             justify-content: center;
         }
         
-        .signin-section h2 {
+        .signin-section h2, .change-password-section h2 {
             color: var(--primary);
             font-size: 2rem;
             margin-bottom: 30px;
@@ -103,7 +103,7 @@
             padding-bottom: 10px;
         }
         
-        .signin-section h2::after {
+        .signin-section h2::after, .change-password-section h2::after {
             content: '';
             position: absolute;
             bottom: 0;
@@ -147,6 +147,32 @@
             background-color: white;
         }
         
+        .password-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        #password, #current_password, #new_password {
+            padding-right: 3rem;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            background: transparent;
+            border: none;
+            color: var(--dark);
+            opacity: 0.7;
+            transition: opacity 0.2s;
+            font-size: 1.2rem;
+            padding: 0.5rem;
+        }
+
+        .toggle-password:hover {
+            opacity: 1;
+        }
+        
         button {
             padding: 14px;
             border-radius: 8px;
@@ -165,20 +191,24 @@
             box-shadow: 0 5px 15px rgba(110, 72, 170, 0.4);
         }
         
-        .signup-link {
+        .signup-link, .back-link {
             text-align: center;
             margin-top: 20px;
             color: #666;
         }
         
-        .signup-link a {
+        .signup-link a, .back-link a {
             color: var(--primary);
             text-decoration: none;
             font-weight: 600;
         }
         
-        .signup-link a:hover {
+        .signup-link a:hover, .back-link a:hover {
             text-decoration: underline;
+        }
+        
+        .change-password-section {
+            display: none;
         }
         
         @media (max-width: 768px) {
@@ -186,7 +216,7 @@
                 flex-direction: column;
             }
             
-            .welcome-section, .signin-section {
+            .welcome-section, .signin-section, .change-password-section {
                 padding: 40px 30px;
             }
             
@@ -210,7 +240,7 @@
             <img src="/static/HALlogo.jpg" alt="HAL Logo" class="hal-logo" />
         </div>
         
-        <div class="signin-section">
+        <div class="signin-section" id="signinSection">
             <h2>Sign In</h2>
             <form method="POST" action="{% url 'signin' %}">
                 {% csrf_token %}
@@ -221,16 +251,88 @@
                 
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required />
+                    <div class="password-container">
+                        <input type="password" id="password" name="password" required />
+                        <button type="button" class="toggle-password" aria-label="Show password" data-target="password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
                 
                 <button type="submit">Sign In</button>
                 
                 <div class="signup-link">
+                    <span class="change-password-link" style="cursor: pointer; color: var(--primary); font-weight: 600;">Change your password?</span><br>
                     Don't have an account? <a href="{% url 'signup' %}">Sign Up</a>
                 </div>
             </form>
         </div>
+        
+        <div class="change-password-section" id="changePasswordSection">
+            <h2>Change Password</h2>
+            <form id="changePasswordForm" method="POST" action="{% url 'change_password' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="pb_number">PB Number</label>
+                    <input type="text" id="pb_number" name="pb_number" required />
+                </div>
+                
+                <div class="form-group">
+                    <label for="current_password">Current Password</label>
+                    <div class="password-container">
+                        <input type="password" id="current_password" name="current_password" required />
+                        <button type="button" class="toggle-password" aria-label="Show password" data-target="current_password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="new_password">New Password</label>
+                    <div class="password-container">
+                        <input type="password" id="new_password" name="new_password" required />
+                        <button type="button" class="toggle-password" aria-label="Show password" data-target="new_password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>                
+                <button type="submit">Update Password</button>
+                
+                <div class="back-link">
+                    <a href="#" id="backToSignIn">Back to Sign In</a>
+                </div>
+            </form>
+        </div>
     </div>
+    <script>
+        // Toggle password visibility for all password fields
+        document.querySelectorAll('.toggle-password').forEach(button => {
+            button.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const passwordInput = document.getElementById(targetId);
+                const icon = this.querySelector('i');
+                
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    icon.classList.replace('fa-eye', 'fa-eye-slash');
+                } else {
+                    passwordInput.type = 'password';
+                    icon.classList.replace('fa-eye-slash', 'fa-eye');
+                }
+            });
+        });
+
+        // Toggle between sign in and change password sections
+        document.querySelector('.change-password-link').addEventListener('click', function() {
+            document.getElementById('signinSection').style.display = 'none';
+            document.getElementById('changePasswordSection').style.display = 'flex';
+        });
+
+        document.getElementById('backToSignIn').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('signinSection').style.display = 'flex';
+            document.getElementById('changePasswordSection').style.display = 'none';
+        });
+    </script>
 </body>
 </html>

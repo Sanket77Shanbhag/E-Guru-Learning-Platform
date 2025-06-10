@@ -240,9 +240,9 @@
         /* Dashboard Cards */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
         }
 
         .stat-card {
@@ -537,7 +537,7 @@
         /* Hamburger Menu */
         .hamburger {
             display: none;
-            position: absolute;
+            position: fixed;
             top: 1rem;
             left: 1rem;
             z-index: 1100;
@@ -949,7 +949,137 @@
             font-weight: 600;
             white-space: nowrap;
         }
+        /* CSS Styling */
+        .notification-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
 
+        .notification-bell {
+            background: var(--secondary);
+            color: var(--light);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            font-size: 20px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .notification-bell:hover {
+            background: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .notification-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--accent);
+            color: var(--light);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .notification-dropdown {
+            position: absolute;
+            bottom: 60px;
+            right: 0;
+            width: 350px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        .notification-container.active .notification-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .notification-header {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--sidebar-bg);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .notification-header h4 {
+            margin: 0;
+            color: var(--text-dark);
+        }
+
+        .notification-list {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .notification-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.2s;
+        }
+
+        .notification-item:hover {
+            background: var(--sidebar-bg);
+        }
+
+        .notification-content {
+            margin-bottom: 8px;
+            color: var(--text-dark);
+        }
+
+        .notification-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .approve-btn, .reject-btn {
+            padding: 4px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .approve-btn {
+            background: var(--success);
+            color: white;
+        }
+
+        .approve-btn:hover {
+            opacity: 0.9;
+        }
+
+        .reject-btn {
+            background: var(--accent);
+            color: white;
+        }
+
+        .reject-btn:hover {
+            opacity: 0.9;
+        }
         .data-table td {
             padding: 1rem;
             border-bottom: 1px solid var(--border-color);
@@ -968,6 +1098,10 @@
             display: flex;
             gap: 0.5rem;
             flex-wrap: wrap;
+        }
+        .btn-view {
+            text-decoration: none;
+            color: var(--primary);
         }
 
         .action-btn {
@@ -1077,7 +1211,7 @@
                 flex-wrap: wrap;
             }
             .stats-grid {
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: 1fr;
             }
             .training-grid {
                 grid-template-columns: 1fr;
@@ -1087,7 +1221,6 @@
             }
             .form-container {
                 padding: 1.5rem;
-                margin: 1rem;
             }
             .chart-controls {
                 flex-wrap: wrap;
@@ -1137,30 +1270,23 @@
                 font-size: 1.3rem;
             }
             .form-container {
-                padding: 1.5rem;
+                padding: 1rem;
             }
         }
 
         /* Very small devices (phones, less than 400px) */
         @media (max-width: 399px) {
-            .sidebar {
-                width: 100%;
-            }
-            .chat-header h2 {
-                font-size: 1.2rem;
-            }
-            .logo2 {
-                width: 40px;
-                height: 30px;
+            .chat-header {
+                padding: 10px 15px;
             }
             .message {
                 max-width: 95%;
             }
+            .stat-title {
+                font-size: 0.5rem;
+            }
             .form-title {
                 font-size: 1.2rem;
-            }
-            .form-container {
-                padding: 1rem;
             }
             .table-actions {
                 flex-direction: column;
@@ -1244,6 +1370,8 @@
                         <p><strong>Name:</strong> {{ admin.name }}</p>
                         <p><strong>Gender:</strong> {{ admin.gender }}</p>
                         <p><strong>Role:</strong> {{ admin.role }}</p>
+                            <p><strong>Phone:</strong> {{ admin.phone|default:'N/A' }}</p>
+                            <p><strong>Email ID:</strong> {{ admin.email|default:'N/A' }}</p>
                         <p><strong>Division:</strong> {{ admin.division|default:"N/A" }}</p>
                         <p><strong>Department:</strong> {{ admin.department|default:"N/A" }}</p>
                         <p><strong>Designation:</strong> {{ admin.designation|default:"N/A" }}</p>
@@ -1254,47 +1382,74 @@
                 </div>
             </div>
         </div>
+        <div class="notification-container">
+            <div class="notification-bell">
+                <i class="fas fa-bell"></i>
+                {% if enrollment|length > 0 %}
+                    <span class="notification-count"></span>
+                {% endif %}
+            </div>
+            
+            <div class="notification-dropdown">
+                <div class="notification-header">
+                    <h4>Pending Enrollment Requests</h4>
+                </div>
+                <div class="notification-list">
+                    {% for enroll in enrollment %}
+                        {% if enroll.status == 'pending' %}
+                            <div class="notification-item" data-enrollment-id="{{ enroll.id }}">
+                                <div class="notification-content">
+                                    <strong>{{ enroll.name }}</strong> with PB Number <strong>{{enroll.pb_number}}</strong> wants to enroll in <strong>{{ enroll.trngtitle }} </strong>
+                                </div>
+                                <div class="notification-actions">
+                                    <button class="approve-btn" 
+                                            data-pb-number="{{ enroll.pb_number }}" 
+                                            data-training-id="{{ enroll.training_id }}" 
+                                            onclick="handleEnrollment(this, 'accept')">Approve</button>
 
+                                    <button class="reject-btn" 
+                                            data-pb-number="{{ enroll.pb_number }}" 
+                                            data-training-id="{{ enroll.training_id }}" 
+                                            onclick="handleEnrollment(this, 'reject')">Reject</button>
+                                </div>
+                            </div>
+                        {% endif %}
+                        {% if enroll.status != 'pending' %}
+                            <div class="notification-item">
+                                <div class="notification-content">
+                                    No pending requests
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    
+                </div>
+            </div>
+        </div>
         <!-- Analytics Section -->
         <div id="analytics" class="content-section">
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-title">Total Trainings</div>
                     <div class="stat-value">{{ trainings|length }}</div>
-                    {% comment %} <div class="stat-change">
-                        <i class="fas fa-arrow-up"></i> 12% from last month
-                    </div> {% endcomment %}
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">Active Users</div>
                     <div class="stat-value">{{ all_users|length }}</div>
-                    {% comment %} <div class="stat-change">
-                        <i class="fas fa-arrow-up"></i> 8% from last month
-                    </div> {% endcomment %}
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">Overall Completed Trainings</div>
                     <div class="stat-value">{{ completed|length }}</div>
-                    {% comment %} <div class="stat-change down">
-                        <i class="fas fa-arrow-down"></i> 3% from last month
-                    </div> {% endcomment %}
                 </div>
-                {% comment %} <div class="stat-card">
-                    <div class="stat-title">Upcoming Trainings</div>
-                    <div class="stat-value">{{ upcoming_trainings }}</div>
-                    <div class="stat-change">
-                        <i class="fas fa-arrow-up"></i> 15% from last month
-                    </div>
-                </div> {% endcomment %}
             </div>
 
             <div class="chart-container">
                 <div class="chart-header">
                     <h3 class="chart-title">Training Analytics</h3>
                     <div class="chart-controls">
-                        <button class="chart-btn active">Monthly</button>
-                        <button class="chart-btn">Quarterly</button>
-                        <button class="chart-btn">Yearly</button>
+                        <button class="chart-btn active" data-chart-type="monthly">Monthly</button>
+                        <button class="chart-btn" data-chart-type="quarterly">Quarterly</button>
+                        <button class="chart-btn" data-chart-type="yearly">Yearly</button>
                     </div>
                 </div>
                 <canvas id="analyticsChart" height="300"></canvas>
@@ -1306,7 +1461,7 @@
             <div class="filter-bar">
                 <div class="search-box">
                     <i class="fas fa-search"></i>
-                    <input type="text" class="search-input form-control" placeholder="Search trainings..." id="trainingSearchInput" onkeyup="filterTrainings()">
+                    <input type="text" class="search-input" placeholder="Search trainings..." id="trainingSearchInput" onkeyup="filterTrainings()">
                 </div>
                 
                 <div class="filter-group">
@@ -1314,7 +1469,7 @@
                         <option value="all">All Categories</option>
                         <option value="aerodynamics">Aerodynamics</option>
                         <option value="aviation">Aviation</option>
-                        <option value="personality-development">Personality Development</option>
+                        <option value="personality development">Personality Development</option>
                         <option value="technical">Technical</option>
                         <option value="corporate">Corporate</option>
                         <option value="management">Management</option>
@@ -1397,7 +1552,7 @@
                                 <option value="" disabled selected>Select Category</option>
                                 <option value="aerodynamics">Aerodynamics</option>
                                 <option value="aviation">Aviation</option>
-                                <option value="personality-development">Personality Development</option>
+                                <option value="personality development">Personality Development</option>
                                 <option value="technical">Technical</option>
                                 <option value="corporate">Corporate</option>
                                 <option value="management">Management</option>
@@ -1540,6 +1695,22 @@
                             <label for="name" class="form-label">Full Name</label>
                             <input type="text" class="form-control" id="name" name="name" required>
                         </div>
+
+                        <!-- Added Phone Number Field -->
+                        <div class="form-group">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" required 
+                                pattern="[0-9]{10}" 
+                                title="Please enter a 10-digit phone number">
+                        </div>
+
+                        <!-- Added Email Field -->
+                        <div class="form-group">
+                            <label for="email" class="form-label">Email ID</label>
+                            <input type="email" class="form-control" id="email" name="email" required
+                                pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                                title="Please enter a valid email address">
+                        </div>
                         
                         <div class="form-row" style="display: flex; gap: 1rem;">
                             <div class="form-group" style="flex: 1;">
@@ -1653,7 +1824,7 @@
                     <tbody id="llmTableBody">
                         {% for doc in uploaded_documents %}
                         <tr>
-                            <td>{{ doc.name }}</td>
+                            <td><a href="{% if doc.type == 'PDF' or doc.type == 'PPT' or doc.type == 'PPTX' or doc.type == 'DOC' %}{% static doc.file_url %}{% else %}#{% endif %}" target="_blank" class="btn-view"><h4>{{ doc.name }}</h4></a></td>
                             <td>
                                 <span class="badge" style="background: rgba(110,72,170,0.1); color: var(--primary); padding: 0.25rem 0.5rem; border-radius: 20px; font-size: 0.75rem;">
                                     {{ doc.type }}
@@ -1726,7 +1897,6 @@
         document.getElementById('profileToggle').addEventListener('click', function() {
             document.getElementById('profileDropdown').classList.toggle('active');
         });
-
         // Close dropdown when clicking outside
         document.addEventListener('click', function(e) {
             if (!e.target.closest('#profileToggle')) {
@@ -1904,52 +2074,90 @@
             return cookieValue;
         }
         // Initialize chart
-        const ctx = document.getElementById('analyticsChart').getContext('2d');
-        const analyticsChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-                datasets: [{
-                    label: 'Trainings Completed',
-                    data: [12, 19, 15, 20, 18, 25, 22],
-                    backgroundColor: 'rgba(110, 72, 170, 0.7)',
-                    borderColor: 'rgba(110, 72, 170, 1)',
-                    borderWidth: 1
-                }, {
-                    label: 'New Users',
-                    data: [8, 12, 10, 15, 14, 18, 16],
-                    backgroundColor: 'rgba(157, 80, 187, 0.7)',
-                    borderColor: 'rgba(157, 80, 187, 1)',
-                    borderWidth: 1
-                }]
+        function computeQuarterly(data) {
+            return [
+                data.slice(0, 3).reduce((a, b) => a + b, 0),
+                data.slice(3, 6).reduce((a, b) => a + b, 0),
+                data.slice(6, 9).reduce((a, b) => a + b, 0),
+                data.slice(9, 12).reduce((a, b) => a + b, 0)
+            ];
+        }
+        
+        const progressData = {
+            monthly: {
+                labels: {{ month_labels|safe }},
+                completed: {{ month_complete|safe }},
+                new_users: {{ month_new_users|safe }}
             },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
+            quarterly: {
+                labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                completed: computeQuarterly({{ month_complete|safe }}),
+                new_users: computeQuarterly({{ month_new_users|safe }})
+            },
+            yearly: {
+                labels: {{ year_labels|safe }},
+                completed: {{ year_complete|safe }},
+                new_users: {{ year_new_users|safe }}
+            }
+        };
+        let progressChart = null;
+
+        function renderProgressChart(type) {
+            const ctx = document.getElementById('analyticsChart').getContext('2d');
+            
+        
+            if (progressChart) {
+                progressChart.destroy();
+            }            
+            const data = progressData[type];
+
+            progressChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [
+                        {
+                            label: 'Completed',
+                            data: data.completed,
+                            backgroundColor: 'rgba(110,72,170,0.5)',
+                            borderColor: 'rgba(110,72,170,1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'New Users',
+                            data: data.new_users,
+                            backgroundColor: 'rgba(129, 24, 171, 0.59)',
+                            borderColor: 'rgba(157, 80, 187, 1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
                 },
-                plugins: {
-                    legend: {
-                        position: 'top',
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: { mode: 'index', intersect: false }
                     },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
+                    scales: {
+                        y: { beginAtZero: true }
                     }
                 }
-            }
-        });
+            });
+        }
 
-        // Toggle chart period
         document.querySelectorAll('.chart-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', () => {
                 document.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                // Here you would update the chart data based on the selected period
+                btn.classList.add('active');
+                renderProgressChart(btn.getAttribute('data-chart-type'));
             });
         });
+        
+        renderProgressChart('monthly');
 
         // Navigation links
         document.querySelectorAll('.nav-link').forEach(link => {
@@ -2102,6 +2310,54 @@
                 alert('End date must be after start date');
             }
         });
+        
+        // JavaScript for toggle functionality
+        document.querySelector('.notification-bell').addEventListener('click', function() {
+        document.querySelector('.notification-container').classList.toggle('active');
+        });
+        document.addEventListener('click', function(event) {
+        const container = document.querySelector('.notification-container');
+        if (!container.contains(event.target) && !event.target.classList.contains('notification-bell')) {
+            container.classList.remove('active');
+        }
+        });
+
+        function handleEnrollment(button, action) {
+            const pbNumber = button.getAttribute('data-pb-number');
+            const trainingId = button.getAttribute('data-training-id');
+
+            let endpoint = '';
+            if (action === 'accept') {
+                endpoint = "{% url 'accept' %}";
+            } else if (action === 'reject') {
+                endpoint = "{% url 'reject' %}";
+            }
+
+            fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    pb_number: pbNumber,
+                    training_id: trainingId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Optionally hide buttons or reload the page
+                    location.reload();
+                } else {
+                    alert(data.message || 'Failed to process the request.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
     </script>
 </body>
 </html>

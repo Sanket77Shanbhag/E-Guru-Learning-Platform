@@ -593,7 +593,6 @@
             max-height: 260px;
         }
         
-        /* Make the import form title smaller */
         .form-container.import-form .form-title {
             font-size: 1.25rem;
             margin-bottom: 1.5rem;
@@ -697,7 +696,16 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-
+        .chart-btns{
+            padding: 0.5rem 1rem;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border: none;
+            color: white;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
         .chart-btn.active {
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             color: white;
@@ -748,13 +756,8 @@
         }
 
         .btn-view {
-            color: black;
-            font-family: 'Roboto', sans-serif;
-            font-size: 0.85rem;
             text-decoration: none;
-            border-bottom: 1px solid var(--border-color);
-            border-bottom: none;
-            background-color: rgba(110,72,170,0.05);
+            color: var(--primary);
         }
 
         .table-actions {
@@ -1121,8 +1124,6 @@
 </head>
 <body>
     <div class="dashboard-container">
-        <!-- Sidebar -->
-        <!-- Hamburger Icon for Mobile -->
         <div class="hamburger" onclick="toggleSidebar()">
             <i class="fas fa-bars"></i>
         </div>
@@ -1143,7 +1144,7 @@
         <div class="main-content">
             <!-- Top Bar -->
             <div class="top-bar">
-                <h1 class="page-title">Hello {{user.name}}</h1>
+                <h1 class="page-title">Hello {{user.name}}!</h1>
                 <div class="user-profile" id="profileToggle">
                     <div class="user-avatar">{{ user.name|first|upper }}</div>
                     <div>
@@ -1157,6 +1158,8 @@
                             <p><strong>Name:</strong> {{ user.name }}</p>
                             <p><strong>Gender:</strong> {{ user.gender }}</p>
                             <p><strong>Role:</strong> {{ user.role }}</p>
+                            <p><strong>Phone:</strong> {{ user.phone|default:'N/A' }}</p>
+                            <p><strong>Email ID:</strong> {{ user.email|default:'N/A' }}</p>
                             <p><strong>Division:</strong> {{ user.division|default:'N/A' }}</p>
                             <p><strong>Department:</strong> {{ user.department|default:'N/A' }}</p>
                             <p><strong>Designation:</strong> {{ user.designation|default:'N/A' }}</p>
@@ -1171,16 +1174,11 @@
             <!-- Dashboard Section -->
             <div id="dashboard" class="content-section" style="display: block;">
                 <div class="welcome-message mb-4">
-                    <h2>Welcome back, {{ user.name }}!</h2>
+                    <h2><b>Welcome back</b></h2>
                     <p class="text-muted">Here's what's happening with your training programs today.</p>
                 </div>
                 
                 <div class="stats-grid">
-                    {% comment %} <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-star"></i></div>
-                        <h3 class="stat-title">Interested Courses</h3>
-                        <div class="stat-value">{{ interested_courses }}</div>
-                    </div> {% endcomment %}
                     <div class="stat-card">
                         <div class="stat-icon"><i class="fas fa-book"></i></div>
                         <h3 class="stat-title">Enrolled Courses</h3>
@@ -1192,32 +1190,15 @@
                         <div class="stat-value">{{ completed|length }}</div>
                     </div>
                 </div>
-
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title">Training Progress</h3>
-                        <div class="chart-controls">
-                            <button class="chart-btn active" data-chart-type="monthly">Monthly</button>
-                            <button class="chart-btn" data-chart-type="quarterly">Quarterly</button>
-                            <button class="chart-btn" data-chart-type="yearly">Yearly</button>
-                        </div>
-                    </div>
-                    <canvas id="progressChart"></canvas>
-                </div>
-
-                <div class="course-enroll mb-4">
-                    <h2><b>Enrolled Trainings<b></h2>
-                </div>
                 <div class="training-grid" id="trainingsContainer">
                     {% for training in trainings %}
                         {% for enroll in enrollment %}
                             {% if enroll.training_id == training.training_id and enroll.status == 'enrolled' %}
                                 <div class="training-card" data-category="{{ training.category }}" data-status="{{ training.status }}">
                                     <div class="position-relative">
-                                        <img src="{% static training.image_url %}" class="training-img" alt="{{ training.title }}">
-                                        
+                                        <img src="{% static training.image_url %}" class="training-img" alt="{{ training.title }}">                                            
                                         <span class="training-badge badge-{{ enroll.status }}">
-                                            {{ enroll.status|title }}
+                                                <i class="fas fa-check-circle"></i>Enrolled
                                         </span>
                                     </div>
                                     <div class="training-body">
@@ -1230,7 +1211,6 @@
                                         <div class="training-meta">
                                             <span>{{ training.duration }}</span>
                                             <span>{{ training.start_date|date:"d M Y" }} - {{ training.end_date|date:"d M Y" }}</span>
-                                            
                                         </div>
                                         <div class="training-actions">
                                             <form action="{% url 'training_details' training.title%}" method="post">
@@ -1242,9 +1222,21 @@
                                         </div>
                                     </div>
                                 </div>
-                            {% endif %}
+                            {% endif %}                            
                         {% endfor %}
                     {% endfor %}
+                </div>
+                <br>
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Training Progress</h3>
+                        <div class="chart-controls">
+                            <button class="chart-btn active" data-chart-type="monthly">Monthly</button>
+                            <button class="chart-btn" data-chart-type="quarterly">Quarterly</button>
+                            <button class="chart-btn" data-chart-type="yearly">Yearly</button>
+                        </div>
+                    </div>
+                    <canvas id="progressChart" style="height: 250px;"></canvas>
                 </div>
             </div>
 
@@ -1254,11 +1246,10 @@
                     <div class="chart-header">
                         <h3 class="chart-title">Training Analytics</h3>
                         <div class="chart-controls">
-                            <button class="chart-btn active">By Category</button>
-                            <button class="chart-btn">By Status</button>
+                            <button class="chart-btns ">By Category</button>
                         </div>
                     </div>
-                    <canvas id="analyticsChart"></canvas>
+                    <canvas id="analyticsChart" style="height: 250px;"></canvas>
                 </div>
             </div>
 
@@ -1274,7 +1265,7 @@
                             <option value="all">All Categories</option>
                             <option value="aerodynamics">Aerodynamics</option>
                             <option value="aviation">Aviation</option>
-                            <option value="personality-development">Personality Development</option>
+                            <option value="personality development">Personality Development</option>
                             <option value="technical">Technical</option>
                             <option value="corporate">Corporate</option>
                             <option value="management">Management</option>
@@ -1375,6 +1366,7 @@
                 </div>
             </div>
 
+            <!-- Manage LLM Documents Section -->
             <div id="manage-llms" class="content-section">
                 <div class="form-container">
                     <h2 class="form-title">Upload LLM Documents</h2>
@@ -1402,7 +1394,6 @@
                 </div>
             </div>
     
-            
             <!-- eGuru Chatbot Section -->
             <div id="eguru-chatbot" class="content-section">
                 <div class="chat-container">
@@ -1439,9 +1430,6 @@
             </div>
         </div>
     </div>
-
-    
-
     <script>
         // Toggle profile dropdown
         document.getElementById('profileToggle').addEventListener('click', function() {
@@ -1557,9 +1545,6 @@
         }
         // Initialize event listeners
         document.addEventListener('DOMContentLoaded', function() {
-            // User search and filter
-            document.getElementById('userSearchInput').addEventListener('input', filterUsers);
-            document.getElementById('userFilter').addEventListener('change', filterUsers);
             
             // LLM document search
             document.getElementById('llmSearchInput').addEventListener('input', filterLLMDocs);
@@ -1605,7 +1590,6 @@
                 showSection(this.getAttribute('href').substring(1));
             });
         });
-
                 
         // Section navigation
         function showSection(sectionId) {
@@ -1665,7 +1649,6 @@
                 data.slice(9, 12).reduce((a, b) => a + b, 0)
             ];
         }
-        
         const progressData = {
             monthly: {
                 labels: {{ month_labels|safe }},
@@ -1681,7 +1664,13 @@
                 labels: {{ year_labels|safe }},
                 enrolled: {{ year_enroll|safe }},
                 completed: {{ year_complete|safe }}
+            },
+            category: {
+                labels: {{ category_labels|safe }},
+                enrolled: {{ category_enrolled|safe }},
+                completed: {{ category_completed|safe }}
             }
+            
         };
         
         let progressChart = null;
@@ -1741,38 +1730,36 @@
         // Load default chart
         renderProgressChart('monthly');
         
-        // Initialize progress chart
-        
         // Initialize analytics chart
         function initAnalyticsChart() {
             const ctx = document.getElementById('analyticsChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'doughnut',
+
+            const chartData = progressData['category'];
+            analyticsChart = new Chart(ctx, {
+                type: 'bar',
                 data: {
-                    labels: ['Completed', 'In Progress', 'Upcoming'],
+                    labels: chartData.labels,
                     datasets: [{
-                        data: [300, 50, 100],
-                        backgroundColor: [
-                            'rgba(110, 72, 170, 0.8)',
-                            'rgba(157, 80, 187, 0.8)',
-                            'rgba(40, 167, 69, 0.8)'
-                        ],
+                        label: 'Enrolled',
+                        data: chartData.enrolled,
+                        backgroundColor: 'rgba(110, 72, 170, 0.8)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Completed',
+                        data: chartData.completed,
+                        backgroundColor: 'rgba(157, 80, 187, 0.8)',
                         borderWidth: 1
                     }]
                 },
                 options: {
+                    height: 250,
                     responsive: true,
                     plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(tooltipItem) {
-                                    return tooltipItem.label + ': ' + tooltipItem.raw;
-                                }
-                            }
-                        }
+                        legend: { position: 'top' },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
                     }
                 }
             });
