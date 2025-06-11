@@ -47,3 +47,6 @@ urlpatterns = [
     path('reject/', views.reject, name='reject'),
     path('submit-review/', views.submit_review, name='submit_review'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

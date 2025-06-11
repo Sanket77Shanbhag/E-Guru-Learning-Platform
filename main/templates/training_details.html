@@ -1427,6 +1427,7 @@
                     <p id="aiSummaryText">No feedbacks available yet. Be the first to share your experience!</p>
                 {% endif %}                
             </div>
+            
             <div class="reviews-carousel">
                 <button class="nav-button prev-button" aria-label="Previous review">❮</button>
                 
@@ -1596,6 +1597,168 @@
             form.style.display = form.style.display === 'none' ? 'block' : 'none';
             gen.style.display = 'none';
         }
+        document.addEventListener('DOMContentLoaded', () => {
+            const stars = document.querySelectorAll('.star');
+            const reviewButton = document.getElementById('reviewButton');
+            const reviewForm = document.getElementById('reviewForm');
+            const reviewForms = document.getElementById('reviewForms');
+            const reviewsList = document.querySelector('.reviews-list');
+
+            // Toggle review form
+            reviewButton.addEventListener('click', () => {
+                reviewForm.style.display = reviewForm.style.display === 'none' ? 'block' : 'none';
+            });
+
+            // Handle star selection
+            stars.forEach(star => {
+                star.addEventListener('click', () => {
+                    const value = parseInt(star.getAttribute('data-value'));
+                    document.getElementById('ratingValue').value = value;
+
+                    stars.forEach((s, index) => {
+                        s.classList.toggle('active', index < value);
+                    });
+                });
+            });
+
+            reviewForms.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const commentTextArea = document.getElementById('reviewComment');
+                const message = document.getElementById('wordCountMessage');
+                const comment = commentTextArea.value.trim();
+                const words = comment.split(/\s+/);
+
+                if (words.length > 50) {
+                    message.style.display = 'block';
+                    return;
+                } else {
+                    message.style.display = 'none';
+                }
+
+                const formData = new FormData(reviewForms);
+                const rating = formData.get('rating');
+
+                if (!rating || !comment) {
+                    alert('Please provide both a star rating and a comment.');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/submit-review/', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            training_id: formData.get('training_id'),
+                            training_title: formData.get('training_title'),
+                            user: formData.get('user_name'),
+                            pb_number: formData.get('pb_number'),
+                            rating: parseInt(rating),
+                            comment: comment
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to submit review');
+                    }
+
+                    // Reset form on success
+                    commentTextArea.value = '';
+                    document.getElementById('ratingValue').value = '';
+                    stars.forEach(s => s.classList.remove('active'));
+                    reviewForm.style.display = 'none';
+                } catch (error) {
+                    console.error('Error submitting review:', error);
+                    alert('Failed to submit review. Please try again.');
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Calculate average rating
+            const reviews = document.querySelectorAll('.review-item');
+            const overallRating = document.getElementById('overallRating');
+            const overallRatings = document.getElementById('overallRatings');
+            const totalRatings = document.getElementById('totalRatings');
+            
+            if (reviews.length > 0) {
+                let total = 0;
+                let excellentCount = 0;
+                let goodCount = 0;
+                let averageCount = 0;
+                let poorCount = 0;
+                
+                reviews.forEach(review => {
+                    const stars = review.querySelector('.review-rating').textContent;
+                    const rating = stars.match(/★/g).length;
+                    total += rating;
+                    
+                    if (rating >= 4.5) excellentCount++;
+                    else if (rating >= 3.5) goodCount++;
+                    else if (rating >= 2.5) averageCount++;
+                    else poorCount++;
+                });
+                
+                const average = (total / reviews.length).toFixed(1);
+                overallRating.textContent = `${average} out of 5`;
+                overallRatings.textContent = `${average} out of 5`;
+                totalRatings.textContent = `Overall ${reviews.length} rating${reviews.length !== 1 ? 's' : ''}`;
+                
+            }
+            
+            // Carousel navigation
+            const prevBtn = document.querySelector('.prev-button');
+            const nextBtn = document.querySelector('.next-button');
+            const dots = document.querySelectorAll('.dot');
+            let currentIndex = 0;
+            
+            function showReview(index) {
+                reviews.forEach((review, i) => {
+                    review.classList.remove('active');
+                    dots[i]?.classList.remove('active');
+                    
+                    if (i === index) {
+                        review.classList.add('active');
+                        dots[i]?.classList.add('active');
+                    }
+                });
+            }
+            
+            function nextReview() {
+                currentIndex = (currentIndex + 1) % reviews.length;
+                showReview(currentIndex);
+            }
+            
+            function prevReview() {
+                currentIndex = (currentIndex - 1 + reviews.length) % reviews.length;
+                showReview(currentIndex);
+            }
+            
+            nextBtn.addEventListener('click', nextReview);
+            prevBtn.addEventListener('click', prevReview);
+            
+            // Dot navigation
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    currentIndex = index;
+                    showReview(currentIndex);
+                });
+            });
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') nextReview();
+                if (e.key === 'ArrowLeft') prevReview();
+            });
+            
+            // Initialize
+            if (reviews.length > 0) {
+                showReview(0);
+            }
+        });
 
         function deleteMaterial(button) {
             const materialId = button.getAttribute('data-material-id');
@@ -1930,168 +2093,7 @@
             this.submit();
         });
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const stars = document.querySelectorAll('.star');
-            const reviewButton = document.getElementById('reviewButton');
-            const reviewForm = document.getElementById('reviewForm');
-            const reviewForms = document.getElementById('reviewForms');
-            const reviewsList = document.querySelector('.reviews-list');
-
-            // Toggle review form
-            reviewButton.addEventListener('click', () => {
-                reviewForm.style.display = reviewForm.style.display === 'none' ? 'block' : 'none';
-            });
-
-            // Handle star selection
-            stars.forEach(star => {
-                star.addEventListener('click', () => {
-                    const value = parseInt(star.getAttribute('data-value'));
-                    document.getElementById('ratingValue').value = value;
-
-                    stars.forEach((s, index) => {
-                        s.classList.toggle('active', index < value);
-                    });
-                });
-            });
-
-            reviewForms.addEventListener('submit', async (e) => {
-                e.preventDefault();
-
-                const commentTextArea = document.getElementById('reviewComment');
-                const message = document.getElementById('wordCountMessage');
-                const comment = commentTextArea.value.trim();
-                const words = comment.split(/\s+/);
-
-                if (words.length > 50) {
-                    message.style.display = 'block';
-                    return;
-                } else {
-                    message.style.display = 'none';
-                }
-
-                const formData = new FormData(reviewForms);
-                const rating = formData.get('rating');
-
-                if (!rating || !comment) {
-                    alert('Please provide both a star rating and a comment.');
-                    return;
-                }
-
-                try {
-                    const response = await fetch('/submit-review/', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            training_id: formData.get('training_id'),
-                            training_title: formData.get('training_title'),
-                            user: formData.get('user_name'),
-                            pb_number: formData.get('pb_number'),
-                            rating: parseInt(rating),
-                            comment: comment
-                        })
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Failed to submit review');
-                    }
-
-                    // Reset form on success
-                    commentTextArea.value = '';
-                    document.getElementById('ratingValue').value = '';
-                    stars.forEach(s => s.classList.remove('active'));
-                    reviewForm.style.display = 'none';
-                } catch (error) {
-                    console.error('Error submitting review:', error);
-                    alert('Failed to submit review. Please try again.');
-                }
-            });
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Calculate average rating
-            const reviews = document.querySelectorAll('.review-item');
-            const overallRating = document.getElementById('overallRating');
-            const overallRatings = document.getElementById('overallRatings');
-            const totalRatings = document.getElementById('totalRatings');
-            
-            if (reviews.length > 0) {
-                let total = 0;
-                let excellentCount = 0;
-                let goodCount = 0;
-                let averageCount = 0;
-                let poorCount = 0;
-                
-                reviews.forEach(review => {
-                    const stars = review.querySelector('.review-rating').textContent;
-                    const rating = stars.match(/★/g).length;
-                    total += rating;
-                    
-                    if (rating >= 4.5) excellentCount++;
-                    else if (rating >= 3.5) goodCount++;
-                    else if (rating >= 2.5) averageCount++;
-                    else poorCount++;
-                });
-                
-                const average = (total / reviews.length).toFixed(1);
-                overallRating.textContent = `${average} out of 5`;
-                overallRatings.textContent = `${average} out of 5`;
-                totalRatings.textContent = `Overall ${reviews.length} rating${reviews.length !== 1 ? 's' : ''}`;
-                
-            }
-            
-            // Carousel navigation
-            const prevBtn = document.querySelector('.prev-button');
-            const nextBtn = document.querySelector('.next-button');
-            const dots = document.querySelectorAll('.dot');
-            let currentIndex = 0;
-            
-            function showReview(index) {
-                reviews.forEach((review, i) => {
-                    review.classList.remove('active');
-                    dots[i]?.classList.remove('active');
-                    
-                    if (i === index) {
-                        review.classList.add('active');
-                        dots[i]?.classList.add('active');
-                    }
-                });
-            }
-            
-            function nextReview() {
-                currentIndex = (currentIndex + 1) % reviews.length;
-                showReview(currentIndex);
-            }
-            
-            function prevReview() {
-                currentIndex = (currentIndex - 1 + reviews.length) % reviews.length;
-                showReview(currentIndex);
-            }
-            
-            nextBtn.addEventListener('click', nextReview);
-            prevBtn.addEventListener('click', prevReview);
-            
-            // Dot navigation
-            dots.forEach((dot, index) => {
-                dot.addEventListener('click', () => {
-                    currentIndex = index;
-                    showReview(currentIndex);
-                });
-            });
-            
-            // Keyboard navigation
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'ArrowRight') nextReview();
-                if (e.key === 'ArrowLeft') prevReview();
-            });
-            
-            // Initialize
-            if (reviews.length > 0) {
-                showReview(0);
-            }
-        });
+        
     </script>
 </body>
 </html>
