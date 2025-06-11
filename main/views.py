@@ -43,7 +43,7 @@ CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
 
 embedder = SentenceTransformer('all-MiniLM-L6-v2')
-genai.configure(api_key='AIzaSyAJGjyYHt6GX-dSUJgYLv3BUvWdS2nhfGg')
+genai.configure(api_key='GEMINI-API-KEY')
 quiz_model = genai.GenerativeModel(model_name="models/gemini-1.5-flash")
 
 
